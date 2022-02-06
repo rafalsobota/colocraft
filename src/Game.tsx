@@ -308,7 +308,10 @@ const PlayMode = ({
 };
 
 const Game = () => {
-  const [state, setState] = useState<GameState>({ type: "intro" });
+  const [state, setState] = useState<GameState>({
+    type: "play",
+    startedAt: Date.now(),
+  });
 
   const onStart = useCallback(() => {
     setState({ type: "play", startedAt: Date.now() });
