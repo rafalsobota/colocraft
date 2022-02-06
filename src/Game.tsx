@@ -234,8 +234,6 @@ type GameState =
   | { type: "finished"; score: number }
   | { type: "play"; startedAt: number };
 
-type Mode = "intro" | "play" | "finished";
-
 const PlayMode = ({
   startedAt,
   onFinish,
