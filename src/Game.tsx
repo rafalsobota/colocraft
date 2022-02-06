@@ -275,7 +275,7 @@ const PlayMode = ({
     <div className="relative">
       <motion.div
         animate={{ opacity: secondsLeft > 1 ? 1 : 0 }}
-        transition={{ duration: 1 }}
+        transition={{ duration: 1, ease: "easeIn" }}
       >
         <AnimatePresence>
           {matrix.map((col, x) =>
