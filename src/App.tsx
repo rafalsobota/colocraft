@@ -1,10 +1,10 @@
 import React from "react";
-import Game from "./Game";
+import FunctionalUniphaser from "./uniphaser/FunctionalUniphaser";
 
 function App() {
   return (
-    <div className="m-2 w-[880px] mx-auto">
-      <Game />
+    <div className="text-center">
+      <FunctionalUniphaser />
     </div>
   );
 }
