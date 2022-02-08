@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { idText } from "typescript";
 
 enum Color {
   Blue,
@@ -382,6 +381,8 @@ function FunctionalUniphaser() {
                 }}
               ></div>
             );
+          } else {
+            return <></>;
           }
         })
       )}
