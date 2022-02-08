@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { idText } from "typescript";
 
 enum Color {
   Blue,
@@ -13,8 +14,6 @@ const rows = 8;
 
 function randomColor(): Color {
   return Math.round(Math.random() * 4);
-  // const colors = Object.values(Color);
-  // return colors[Math.round(Math.random() * (colors.length - 1))] as Color;
 }
 
 function bgColor(color: Color): string {
@@ -34,17 +33,38 @@ function bgColor(color: Color): string {
 
 enum CellType {
   Spawning,
+  Dropped,
   Idle,
   Clicked,
+  Fusion,
+  ScoreEnter,
+  ScoreExit,
+  Bomb,
+}
+
+enum FusionDirection {
+  Horizontal,
+  Vertical,
 }
 
 type Cell =
   | { type: CellType.Spawning; color: Color; id: string }
+  | { type: CellType.Dropped; color: Color; id: string }
   | { type: CellType.Idle; color: Color; id: string }
-  | { type: CellType.Clicked; color: Color; id: string };
+  | { type: CellType.Clicked; color: Color; id: string }
+  | {
+      type: CellType.Fusion;
+      color: Color;
+      id: string;
+      score: number;
+      direction: FusionDirection;
+    }
+  | { type: CellType.ScoreEnter; color: Color; id: string; score: number }
+  | { type: CellType.ScoreExit; color: Color; id: string; score: number }
+  | { type: CellType.Bomb; color: Color; id: string };
 
 function clickCell(cell: Cell): Cell {
-  if (cell.type === CellType.Idle) {
+  if (cell.type === CellType.Idle || cell.type === CellType.Bomb) {
     return {
       ...cell,
       type: CellType.Clicked,
@@ -54,11 +74,81 @@ function clickCell(cell: Cell): Cell {
   }
 }
 
+function canFuse(matrix: Matrix, x: number, y: number, color: Color): boolean {
+  if (x < 0 || x >= cols || y < 0 || y >= rows) {
+    return false;
+  }
+
+  const cell = matrix[x][y];
+
+  if (
+    cell.type !== CellType.Idle &&
+    cell.type !== CellType.Dropped &&
+    cell.type !== CellType.Bomb
+  ) {
+    return false;
+  }
+
+  if (cell.color !== color) {
+    return false;
+  }
+
+  return true;
+}
+
 function mutateCell(cell: Cell, x: number, y: number, matrix: Matrix): Cell {
   if (cell.type === CellType.Spawning) {
     return {
       ...cell,
-      type: CellType.Idle,
+      type: CellType.Dropped,
+    };
+  } else if (cell.type === CellType.Idle || cell.type === CellType.Dropped) {
+    const color = cell.color;
+
+    const h = [
+      canFuse(matrix, x - 2, y, color),
+      canFuse(matrix, x - 1, y, color),
+      canFuse(matrix, x + 1, y, color),
+      canFuse(matrix, x + 2, y, color),
+    ];
+    const v = [
+      canFuse(matrix, x, y - 2, color),
+      canFuse(matrix, x, y - 1, color),
+      canFuse(matrix, x, y + 1, color),
+      canFuse(matrix, x, y + 2, color),
+    ];
+
+    const verticalFusion = (v[0] && v[1]) || (v[1] && v[2]) || (v[2] && v[3]);
+    const horizontalFusion = (h[0] && h[1]) || (h[1] && h[2]) || (h[2] && h[3]);
+
+    if (horizontalFusion && verticalFusion) {
+      return {
+        ...cell,
+        type: CellType.Bomb,
+      };
+    } else if (horizontalFusion) {
+      return {
+        ...cell,
+        type: CellType.Fusion,
+        direction: FusionDirection.Horizontal,
+        score: 1,
+      };
+    } else if (verticalFusion) {
+      return {
+        ...cell,
+        type: CellType.Fusion,
+        direction: FusionDirection.Vertical,
+        score: 1,
+      };
+    } else {
+      return { ...cell, type: CellType.Idle };
+    }
+  } else if (cell.type === CellType.Fusion) {
+    return { ...cell, type: CellType.ScoreEnter };
+  } else if (cell.type === CellType.ScoreEnter) {
+    return {
+      ...cell,
+      type: CellType.ScoreExit,
     };
   }
 
@@ -67,7 +157,10 @@ function mutateCell(cell: Cell, x: number, y: number, matrix: Matrix): Cell {
 
 function fillGaps(matrix: Matrix): Matrix {
   return matrix.map((col) => {
-    const filteredRows = col.filter((cell) => cell.type !== CellType.Clicked);
+    const filteredRows = col.filter(
+      (cell) =>
+        cell.type !== CellType.Clicked && cell.type !== CellType.ScoreExit
+    );
     const lackingCellsCount = rows - filteredRows.length;
     return [
       ...Array(lackingCellsCount)
@@ -81,7 +174,7 @@ function fillGaps(matrix: Matrix): Matrix {
 function isDirty(matrix: Matrix): boolean {
   return matrix.some((col) =>
     col.some((cell) => {
-      return cell.type === CellType.Clicked || cell.type === CellType.Spawning;
+      return cell.type !== CellType.Idle && cell.type !== CellType.Bomb;
     })
   );
 }
@@ -192,7 +285,10 @@ function FunctionalUniphaser() {
                 }}
               ></div>
             );
-          } else if (cell.type === CellType.Idle) {
+          } else if (
+            cell.type === CellType.Dropped ||
+            cell.type === CellType.Idle
+          ) {
             return (
               <div
                 key={cell.id}
@@ -216,6 +312,66 @@ function FunctionalUniphaser() {
                 className={`absolute ${bgColor(
                   cell.color
                 )} rounded-xl w-[70px] h-[70px] transition-all cursor-pointer opacity-0 scale-0 ease-spring duration-300`}
+                style={{
+                  top: y * 75 + 2,
+                  left: x * 75 + 2,
+                }}
+              ></div>
+            );
+          } else if (cell.type === CellType.Fusion) {
+            return (
+              <div
+                key={cell.id}
+                data-id={cell.id}
+                className={`absolute ${bgColor(cell.color)} rounded-xl ${
+                  cell.direction === FusionDirection.Horizontal
+                    ? "w-[90px] h-[0px] ml-[-10px] mt-[35px]"
+                    : "w-[0px] h-[90px] ml-[35px] mt-[-10px]"
+                } transition-all cursor-pointer opacity-1 ease-spring duration-300 scale-100`}
+                style={{
+                  top: y * 75 + 2,
+                  left: x * 75 + 2,
+                }}
+              ></div>
+            );
+          } else if (cell.type === CellType.ScoreEnter) {
+            return (
+              <div
+                key={cell.id}
+                data-id={cell.id}
+                className={`absolute text-black rounded-xl w-[70px] h-[70px] transition-all cursor-pointer opacity- scale-1 ease-spring duration-300`}
+                style={{
+                  top: y * 75 + 2,
+                  left: x * 75 + 2,
+                }}
+              >
+                {cell.score}
+              </div>
+            );
+          } else if (cell.type === CellType.ScoreExit) {
+            return (
+              <div
+                key={cell.id}
+                data-id={cell.id}
+                className={`absolute text-black rounded-xl w-[70px] h-[70px] transition-all cursor-pointer opacity-0 scale-0 ease-spring duration-300`}
+                style={{
+                  top: y * 75 + 2,
+                  left: x * 75 + 2,
+                }}
+              >
+                {cell.score}
+              </div>
+            );
+          } else if (cell.type === CellType.Bomb) {
+            return (
+              <div
+                key={cell.id}
+                data-id={cell.id}
+                onTouchStart={onTap}
+                onMouseDown={onClick}
+                className={`absolute ${bgColor(
+                  cell.color
+                )} rounded-full w-[70px] h-[70px] transition-all cursor-pointer opacity-1 ease-spring duration-300 scale-100`}
                 style={{
                   top: y * 75 + 2,
                   left: x * 75 + 2,
