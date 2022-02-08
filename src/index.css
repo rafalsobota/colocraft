@@ -10,15 +10,16 @@
 
 html {
   touch-action: manipulation;
-  overflow: hidden;
 }
 
 html,
 body,
 #root {
   height: 100%;
+  width: 100%;
 }
 
 body {
   @apply bg-white dark:bg-slate-900;
+  position: fixed;
 }
