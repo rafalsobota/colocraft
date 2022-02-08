@@ -267,7 +267,7 @@ function FunctionalUniphaser() {
   );
 
   return (
-    <div className="relative w-[375px] h-[700px] mx-auto acceleration overflow-hidden select-none">
+    <div className="relative w-[375px] h-[700px] mx-auto acceleration select-none">
       {matrix.map((col, x) =>
         col.map((cell, y) => {
           if (cell.type === CellType.Spawning) {
@@ -277,7 +277,7 @@ function FunctionalUniphaser() {
                 data-id={cell.id}
                 className={`absolute ${bgColor(
                   cell.color
-                )} rounded-xl w-[70px] h-[70px] transition-all cursor-pointer opacity-1 ease-spring duration-300`}
+                )} rounded-xl w-[70px] h-[70px] transition-all cursor-pointer opacity-0 ease-spring duration-300`}
                 style={{
                   top: -75 + 2,
                   left: x * 75 + 2,
