@@ -12,3 +12,9 @@ html {
   touch-action: manipulation;
   overflow: hidden;
 }
+
+html,
+body,
+#root {
+  height: 100%;
+}
