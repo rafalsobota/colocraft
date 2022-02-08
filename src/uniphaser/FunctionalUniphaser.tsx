@@ -267,7 +267,7 @@ function FunctionalUniphaser() {
   );
 
   return (
-    <div className="relative w-[375px] h-[700px] mx-auto acceleration overflow-hidden select-none dark:bg-slate-900">
+    <div className="relative w-[375px] h-[700px] mx-auto acceleration overflow-hidden select-none">
       {matrix.map((col, x) =>
         col.map((cell, y) => {
           if (cell.type === CellType.Spawning) {
