@@ -18,3 +18,7 @@ body,
 #root {
   height: 100%;
 }
+
+body {
+  @apply bg-white dark:bg-slate-900;
+}
