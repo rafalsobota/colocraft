@@ -19,15 +19,15 @@ function randomColor(): Color {
 function bgColor(color: Color): string {
   switch (color) {
     case Color.Blue:
-      return "bg-blue-500 hover:bg-blue-600";
+      return "bg-blue-500 hover:bg-blue-600 text-blue-600";
     case Color.Green:
-      return "bg-green-500 hover:bg-green-600";
+      return "bg-green-500 hover:bg-green-600 text-green-600";
     case Color.Yellow:
-      return "bg-yellow-500 hover:bg-yellow-600";
+      return "bg-yellow-500 hover:bg-yellow-600 text-yellow-600";
     case Color.Pink:
-      return "bg-pink-500 hover:bg-pink-600";
+      return "bg-pink-500 hover:bg-pink-600 text-pink-600";
     case Color.Purple:
-      return "bg-purple-500 hover:bg-purple-600";
+      return "bg-purple-500 hover:bg-purple-600 text-purple-600";
   }
 }
 
@@ -339,7 +339,9 @@ function FunctionalUniphaser() {
               <div
                 key={cell.id}
                 data-id={cell.id}
-                className={`absolute text-black rounded-xl w-[70px] h-[70px] transition-all cursor-pointer opacity- scale-1 ease-spring duration-300`}
+                className={`absolute ${bgColor(
+                  cell.color
+                )} bg-transparent text-4xl font-bold rounded-xl w-[70px] h-[70px] transition-all cursor-pointer opacity- scale-1 ease-spring duration-300`}
                 style={{
                   top: y * 75 + 2,
                   left: x * 75 + 2,
@@ -353,7 +355,9 @@ function FunctionalUniphaser() {
               <div
                 key={cell.id}
                 data-id={cell.id}
-                className={`absolute text-black rounded-xl w-[70px] h-[70px] transition-all cursor-pointer opacity-0 scale-0 ease-spring duration-300`}
+                className={`absolute ${bgColor(
+                  cell.color
+                )} bg-transparent text-8xl font-bold rounded-xl w-[70px] h-[70px] transition-all cursor-pointer opacity-0 ease-spring duration-300`}
                 style={{
                   top: y * 75 + 2,
                   left: x * 75 + 2,
