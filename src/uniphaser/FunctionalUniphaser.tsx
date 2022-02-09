@@ -39,6 +39,8 @@ enum CellType {
   ScoreEnter,
   ScoreExit,
   Bomb,
+  BombDetonated,
+  BombIgnited,
 }
 
 enum FusionDirection {
@@ -60,16 +62,117 @@ type Cell =
     }
   | { type: CellType.ScoreEnter; color: Color; id: string; score: number }
   | { type: CellType.ScoreExit; color: Color; id: string; score: number }
-  | { type: CellType.Bomb; color: Color; id: string };
+  | { type: CellType.Bomb; color: Color; id: string }
+  | { type: CellType.BombIgnited; color: Color; id: string }
+  | { type: CellType.BombDetonated; color: Color; id: string; score: number };
 
-function clickCell(cell: Cell): Cell {
-  if (cell.type === CellType.Idle || cell.type === CellType.Bomb) {
-    return {
+function findCellById(
+  matrix: Matrix,
+  id: string
+): { cell: Cell; x: number; y: number } | undefined {
+  return findCell(matrix, (cell) => cell.id === id);
+}
+
+function findCell(
+  matrix: Matrix,
+  predicate: (cell: Cell, x: number, y: number) => boolean
+): { cell: Cell; x: number; y: number } | undefined {
+  for (let x = 0; x < cols; x++) {
+    for (let y = 0; y < rows; y++) {
+      const cell = matrix[x][y];
+      if (predicate(cell, x, y)) {
+        return { cell, x, y };
+      }
+    }
+  }
+}
+
+function isWaitForDetonation(matrix: Matrix): boolean {
+  const busy = findCell(
+    matrix,
+    (cell) =>
+      cell.type === CellType.Fusion ||
+      cell.type === CellType.ScoreEnter ||
+      cell.type === CellType.ScoreExit ||
+      cell.type === CellType.Spawning ||
+      cell.type === CellType.Dropped ||
+      cell.type === CellType.BombDetonated
+  );
+  return !!busy;
+}
+
+function detonateBombs(matrix: Matrix): Matrix {
+  const bombIgnited = findCell(
+    matrix,
+    (cell) => cell.type === CellType.BombIgnited
+  );
+  if (!bombIgnited) {
+    return matrix;
+  }
+  if (isWaitForDetonation(matrix)) {
+    return matrix;
+  }
+  return detonateBomb(matrix, bombIgnited.x, bombIgnited.y);
+}
+
+function detonateBomb(matrix: Matrix, x: number, y: number): Matrix {
+  if (matrix[x][y].type !== CellType.BombIgnited) {
+    return matrix;
+  }
+
+  return mapCells(matrix, (cell, cx, cy) => {
+    if (cx >= x - 1 && cx <= x + 1 && cy >= y - 1 && cy <= y + 1) {
+      if (cx === x && cy === y) {
+        return {
+          ...cell,
+          type: CellType.BombDetonated,
+          score: 100,
+        };
+      } else if (
+        cell.type === CellType.Idle ||
+        cell.type === CellType.Dropped
+      ) {
+        return {
+          ...cell,
+          type: CellType.ScoreEnter,
+          score: 10,
+        };
+      } else if (cell.type === CellType.Bomb) {
+        return {
+          ...cell,
+          type: CellType.BombIgnited,
+        };
+      } else {
+        return cell;
+      }
+    } else {
+      return cell;
+    }
+  });
+}
+
+function clickCell(matrix: Matrix, id: string): Matrix {
+  const target = findCellById(matrix, id);
+  if (!target) {
+    return matrix;
+  }
+
+  const { cell, x, y } = target;
+
+  if (cell.type === CellType.Idle) {
+    matrix[x][y] = {
       ...cell,
       type: CellType.Clicked,
     };
+    return [...matrix];
+  } else if (cell.type === CellType.Bomb) {
+    matrix[x][y] = {
+      ...cell,
+      type: CellType.BombIgnited,
+    };
+    return [...matrix];
   } else {
-    return cell;
+    return matrix;
   }
 }
 
@@ -83,7 +186,8 @@ function canFuse(matrix: Matrix, x: number, y: number, color: Color): boolean {
   if (
     cell.type !== CellType.Idle &&
     cell.type !== CellType.Dropped &&
-    cell.type !== CellType.Bomb
+    cell.type !== CellType.Bomb &&
+    cell.type !== CellType.BombIgnited
   ) {
     return false;
   }
@@ -149,6 +253,8 @@ function mutateCell(cell: Cell, x: number, y: number, matrix: Matrix): Cell {
       ...cell,
       type: CellType.ScoreExit,
     };
+  } else if (cell.type === CellType.BombDetonated) {
+    return { ...cell, type: CellType.ScoreEnter };
   }
 
   return cell;
@@ -222,12 +328,14 @@ function FunctionalUniphaser() {
   useEffect(() => {
     if (!dirty) return;
     const interval = setInterval(() => {
-      const newMatrix = fillGaps(mapCells(matrixRef.current, mutateCell));
+      const newMatrix = detonateBombs(
+        fillGaps(mapCells(matrixRef.current, mutateCell))
+      );
       setMatrix(newMatrix);
       const newDirty = isDirty(newMatrix);
       console.log("tick", { newDirty });
       setDirty(newDirty);
-    }, 100);
+    }, 150);
     return () => {
       console.log("cleanup");
       clearInterval(interval);
@@ -238,13 +346,7 @@ function FunctionalUniphaser() {
     (event: React.MouseEvent<HTMLDivElement>) => {
       const id = event.currentTarget.dataset.id;
       if (!id) return;
-      setMatrix(
-        matrixRef.current.map((col, x) =>
-          col.map((cell, y) => {
-            return cell.id === id ? clickCell(cell) : cell;
-          })
-        )
-      );
+      setMatrix(clickCell(matrixRef.current, id));
       setDirty(true);
     },
     [matrixRef, setMatrix]
@@ -254,13 +356,7 @@ function FunctionalUniphaser() {
     (event: React.TouchEvent<HTMLDivElement>) => {
       const id = event.currentTarget.dataset.id;
       if (!id) return;
-      setMatrix(
-        matrixRef.current.map((col, x) =>
-          col.map((cell, y) => {
-            return cell.id === id ? clickCell(cell) : cell;
-          })
-        )
-      );
+      setMatrix(clickCell(matrixRef.current, id));
       setDirty(true);
     },
     [matrixRef, setMatrix]
@@ -374,7 +470,35 @@ function FunctionalUniphaser() {
                 onMouseDown={onClick}
                 className={`absolute ${bgColor(
                   cell.color
-                )} rounded-full w-[70px] h-[70px] cursor-pointer opacity-1 scale-100 rotate-180 transition-all ease-spring duration-300`}
+                )} rounded-full w-[70px] h-[70px] cursor-pointer transition-all ease-spring duration-300`}
+                style={{
+                  top: y * 75 + 2,
+                  left: x * 75 + 2,
+                }}
+              ></div>
+            );
+          } else if (cell.type === CellType.BombIgnited) {
+            return (
+              <div
+                key={cell.id}
+                data-id={cell.id}
+                className={`absolute ${bgColor(
+                  cell.color
+                )} rounded-full w-[70px] h-[70px] opacity-1 transition-all ease-spring duration-300 scale-90`}
+                style={{
+                  top: y * 75 + 2,
+                  left: x * 75 + 2,
+                }}
+              ></div>
+            );
+          } else if (cell.type === CellType.BombDetonated) {
+            return (
+              <div
+                key={cell.id}
+                data-id={cell.id}
+                className={`absolute ${bgColor(
+                  cell.color
+                )} rounded-sm w-[70px] h-[70px] opacity-1 transition-all ease-spring duration-300 opacity-0 scale-[3]`}
                 style={{
                   top: y * 75 + 2,
                   left: x * 75 + 2,
