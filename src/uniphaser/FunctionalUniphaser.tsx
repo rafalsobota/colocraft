@@ -267,7 +267,7 @@ function FunctionalUniphaser() {
   );
 
   return (
-    <div className="relative w-[375px] h-[700px] mx-auto acceleration select-none overflow-hidden lg:overflow-visible">
+    <div className="relative w-[375px] h-[700px] mx-auto transform-gpu select-none overflow-hidden lg:overflow-visible">
       {matrix.map((col, x) =>
         col.map((cell, y) => {
           if (cell.type === CellType.Spawning) {
@@ -277,7 +277,7 @@ function FunctionalUniphaser() {
                 data-id={cell.id}
                 className={`absolute ${bgColor(
                   cell.color
-                )} rounded-xl w-[70px] h-[70px] transition-all cursor-pointer opacity-0 ease-spring duration-300`}
+                )} rounded-xl w-[70px] h-[70px] transition-all ease-spring duration-300`}
                 style={{
                   top: -75 + 2,
                   left: x * 75 + 2,
@@ -296,7 +296,7 @@ function FunctionalUniphaser() {
                 onMouseDown={onClick}
                 className={`absolute ${bgColor(
                   cell.color
-                )} rounded-xl w-[70px] h-[70px] transition-all cursor-pointer opacity-1 ease-spring duration-300 scale-100`}
+                )} rounded-xl w-[70px] h-[70px] cursor-pointer opacity-1 scale-100 transition-all ease-spring duration-300`}
                 style={{
                   top: y * 75 + 2,
                   left: x * 75 + 2,
@@ -310,7 +310,7 @@ function FunctionalUniphaser() {
                 data-id={cell.id}
                 className={`absolute ${bgColor(
                   cell.color
-                )} rounded-xl w-[70px] h-[70px] transition-all cursor-pointer opacity-0 scale-0 ease-spring duration-300`}
+                )} rounded-xl w-[70px] h-[70px] cursor-pointer opacity-0 scale-0 transition-all ease-spring duration-300`}
                 style={{
                   top: y * 75 + 2,
                   left: x * 75 + 2,
@@ -326,7 +326,7 @@ function FunctionalUniphaser() {
                   cell.direction === FusionDirection.Horizontal
                     ? "w-[90px] h-[0px] ml-[-10px] mt-[35px]"
                     : "w-[0px] h-[90px] ml-[35px] mt-[-10px]"
-                } transition-all cursor-pointer opacity-1 ease-spring duration-300 scale-100`}
+                } cursor-pointer opacity-1 scale-100 transition-all ease-spring duration-300`}
                 style={{
                   top: y * 75 + 2,
                   left: x * 75 + 2,
@@ -340,7 +340,7 @@ function FunctionalUniphaser() {
                 data-id={cell.id}
                 className={`absolute ${bgColor(
                   cell.color
-                )} bg-transparent text-4xl font-bold rounded-xl w-[70px] h-[70px] transition-all cursor-pointer opacity- scale-1 ease-spring duration-300`}
+                )} bg-transparent text-4xl font-bold rounded-xl w-[70px] h-[70px] cursor-pointer scale-1 transition-all ease-spring duration-300`}
                 style={{
                   top: y * 75 + 2,
                   left: x * 75 + 2,
@@ -356,7 +356,7 @@ function FunctionalUniphaser() {
                 data-id={cell.id}
                 className={`absolute ${bgColor(
                   cell.color
-                )} bg-transparent text-8xl font-bold rounded-xl w-[70px] h-[70px] transition-all cursor-pointer opacity-0 ease-spring duration-300`}
+                )} bg-transparent text-8xl font-bold rounded-xl w-[70px] h-[70px] cursor-pointer opacity-0 transition-all ease-spring duration-300`}
                 style={{
                   top: y * 75 + 2,
                   left: x * 75 + 2,
@@ -374,7 +374,7 @@ function FunctionalUniphaser() {
                 onMouseDown={onClick}
                 className={`absolute ${bgColor(
                   cell.color
-                )} rounded-full w-[70px] h-[70px] transition-all cursor-pointer opacity-1 ease-spring duration-300 scale-100`}
+                )} rounded-full w-[70px] h-[70px] cursor-pointer opacity-1 scale-100 rotate-180 transition-all ease-spring duration-300`}
                 style={{
                   top: y * 75 + 2,
                   left: x * 75 + 2,
