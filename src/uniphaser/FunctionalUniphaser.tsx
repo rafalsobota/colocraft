@@ -395,7 +395,9 @@ function FunctionalUniphaser() {
   const matrixRef = useRef<Matrix>(matrix);
 
   useEffect(() => {
-    audio.preloadAll();
+    audio.preloadAll().then(() => {
+      "audio loaded";
+    });
   }, []);
 
   useEffect(() => {
