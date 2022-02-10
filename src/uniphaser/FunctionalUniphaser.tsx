@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import * as audio from "./audio";
 
 enum Color {
   Blue,
@@ -119,7 +120,7 @@ function detonateBomb(matrix: Matrix, x: number, y: number): Matrix {
   if (matrix[x][y].type !== CellType.BombIgnited) {
     return matrix;
   }
-
+  audio.bombExplosion();
   return mapCells(matrix, (cell, cx, cy) => {
     if (cx >= x - 1 && cx <= x + 1 && cy >= y - 1 && cy <= y + 1) {
       if (cx === x && cy === y) {
@@ -164,6 +165,7 @@ function clickCell(matrix: Matrix, id: string): Matrix {
       ...cell,
       type: CellType.Clicked,
     };
+    audio.click();
     return [...matrix];
   } else if (cell.type === CellType.Bomb) {
     matrix[x][y] = {
@@ -201,21 +203,25 @@ function swipeCell(matrix: Matrix, id: string, direction: Direction): Matrix {
     if (y === 0) return matrix;
     matrix[x][y] = matrix[x][y - 1];
     matrix[x][y - 1] = cell;
+    audio.click();
     return [...matrix];
   } else if (direction === Direction.Down) {
     if (y === rows - 1) return matrix;
     matrix[x][y] = matrix[x][y + 1];
     matrix[x][y + 1] = cell;
+    audio.click();
     return [...matrix];
   } else if (direction === Direction.Left) {
     if (x === 0) return matrix;
     matrix[x][y] = matrix[x - 1][y];
     matrix[x - 1][y] = cell;
+    audio.click();
     return [...matrix];
   } else if (direction === Direction.Right) {
     if (x === cols - 1) return matrix;
     matrix[x][y] = matrix[x + 1][y];
     matrix[x + 1][y] = cell;
+    audio.click();
     return [...matrix];
   } else {
     return matrix;
@@ -271,11 +277,13 @@ function mutateCell(cell: Cell, x: number, y: number, matrix: Matrix): Cell {
     const horizontalFusion = (h[0] && h[1]) || (h[1] && h[2]) || (h[2] && h[3]);
 
     if (horizontalFusion && verticalFusion) {
+      audio.bombCreated();
       return {
         ...cell,
         type: CellType.Bomb,
       };
     } else if (horizontalFusion) {
+      audio.fusion();
       return {
         ...cell,
         type: CellType.Fusion,
@@ -283,6 +291,7 @@ function mutateCell(cell: Cell, x: number, y: number, matrix: Matrix): Cell {
         score: 1,
       };
     } else if (verticalFusion) {
+      audio.fusion();
       return {
         ...cell,
         type: CellType.Fusion,
@@ -386,6 +395,10 @@ function FunctionalUniphaser() {
   const matrixRef = useRef<Matrix>(matrix);
 
   useEffect(() => {
+    audio.preloadAll();
+  }, []);
+
+  useEffect(() => {
     matrixRef.current = matrix;
   }, [matrix]);
 
@@ -397,11 +410,9 @@ function FunctionalUniphaser() {
       );
       setMatrix(newMatrix);
       const newDirty = isDirty(newMatrix);
-      console.log("tick", { newDirty });
       setDirty(newDirty);
     }, 150);
     return () => {
-      console.log("cleanup");
       clearInterval(interval);
     };
   }, [dirty, setMatrix]);
@@ -414,7 +425,7 @@ function FunctionalUniphaser() {
 
   const onPressStart = useCallback(
     (id: string, x: number, y: number) => {
-      console.log("onPressStart", { id, x, y });
+      audio.music();
       setTouchState({ id, x, y });
     },
     [setTouchState]
@@ -422,7 +433,6 @@ function FunctionalUniphaser() {
 
   const onPressMove = useCallback(
     (x: number, y: number) => {
-      console.log("onPressMove", { x, y });
       if (!touchState) return;
       const id = touchState.id;
       const dx = x - touchState.x;
@@ -442,7 +452,6 @@ function FunctionalUniphaser() {
 
   const onPressEnd = useCallback(
     (x: number, y: number) => {
-      console.log("onPressEnd", { x, y });
       if (!touchState) return;
       const id = touchState.id;
       const dx = x - touchState.x;
