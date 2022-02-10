@@ -18,15 +18,15 @@ function randomColor(): Color {
 function bgColor(color: Color): string {
   switch (color) {
     case Color.Blue:
-      return "bg-blue-500 hover:bg-blue-600 text-blue-600";
+      return "bg-blue-500 active:bg-blue-600 text-blue-600";
     case Color.Green:
-      return "bg-green-500 hover:bg-green-600 text-green-600";
+      return "bg-green-500 active:bg-green-600 text-green-600";
     case Color.Yellow:
-      return "bg-yellow-500 hover:bg-yellow-600 text-yellow-600";
+      return "bg-yellow-500 active:bg-yellow-600 text-yellow-600";
     case Color.Pink:
-      return "bg-pink-500 hover:bg-pink-600 text-pink-600";
+      return "bg-pink-500 active:bg-pink-600 text-pink-600";
     case Color.Purple:
-      return "bg-purple-500 hover:bg-purple-600 text-purple-600";
+      return "bg-purple-500 active:bg-purple-600 text-purple-600";
   }
 }
 
@@ -176,6 +176,52 @@ function clickCell(matrix: Matrix, id: string): Matrix {
   }
 }
 
+enum Direction {
+  Up,
+  Down,
+  Left,
+  Right,
+}
+
+function positionDeltaToDirection(dx: number, dy: number): Direction {
+  return Math.abs(dx) > Math.abs(dy)
+    ? dx > 0
+      ? Direction.Right
+      : Direction.Left
+    : dy > 0
+    ? Direction.Down
+    : Direction.Up;
+}
+
+function swipeCell(matrix: Matrix, id: string, direction: Direction): Matrix {
+  const target = findCellById(matrix, id);
+  if (!target) return matrix;
+  const { cell, x, y } = target;
+  if (direction === Direction.Up) {
+    if (y === 0) return matrix;
+    matrix[x][y] = matrix[x][y - 1];
+    matrix[x][y - 1] = cell;
+    return [...matrix];
+  } else if (direction === Direction.Down) {
+    if (y === rows - 1) return matrix;
+    matrix[x][y] = matrix[x][y + 1];
+    matrix[x][y + 1] = cell;
+    return [...matrix];
+  } else if (direction === Direction.Left) {
+    if (x === 0) return matrix;
+    matrix[x][y] = matrix[x - 1][y];
+    matrix[x - 1][y] = cell;
+    return [...matrix];
+  } else if (direction === Direction.Right) {
+    if (x === cols - 1) return matrix;
+    matrix[x][y] = matrix[x + 1][y];
+    matrix[x + 1][y] = cell;
+    return [...matrix];
+  } else {
+    return matrix;
+  }
+}
+
 function canFuse(matrix: Matrix, x: number, y: number, color: Color): boolean {
   if (x < 0 || x >= cols || y < 0 || y >= rows) {
     return false;
@@ -305,6 +351,24 @@ function createMatrix(): Matrix {
   return matrix;
 }
 
+type CellWithPosition = { cell: Cell; x: number; y: number };
+
+function cellsWithPosition(matrix: Matrix): CellWithPosition[] {
+  let acc: CellWithPosition[] = [];
+
+  for (let i = 0; i < cols; i++) {
+    for (let j = 0; j < rows; j++) {
+      acc.push({
+        cell: matrix[i][j],
+        x: i,
+        y: j,
+      });
+    }
+  }
+
+  return acc.sort((a, b) => (a.cell.id < b.cell.id ? -1 : 1));
+}
+
 function mapCells(
   matrix: Matrix,
   mapper: (cell: Cell, x: number, y: number, matrix: Matrix) => Cell
@@ -342,174 +406,268 @@ function FunctionalUniphaser() {
     };
   }, [dirty, setMatrix]);
 
-  const onClick = useCallback(
-    (event: React.MouseEvent<HTMLDivElement>) => {
-      const id = event.currentTarget.dataset.id;
-      if (!id) return;
-      setMatrix(clickCell(matrixRef.current, id));
-      setDirty(true);
+  const [touchState, setTouchState] = useState<{
+    id: string;
+    x: number;
+    y: number;
+  } | null>(null);
+
+  const onPressStart = useCallback(
+    (id: string, x: number, y: number) => {
+      console.log("onPressStart", { id, x, y });
+      setTouchState({ id, x, y });
     },
-    [matrixRef, setMatrix]
+    [setTouchState]
   );
 
-  const onTap = useCallback(
-    (event: React.TouchEvent<HTMLDivElement>) => {
-      const id = event.currentTarget.dataset.id;
-      if (!id) return;
-      setMatrix(clickCell(matrixRef.current, id));
-      setDirty(true);
+  const onPressMove = useCallback(
+    (x: number, y: number) => {
+      console.log("onPressMove", { x, y });
+      if (!touchState) return;
+      const id = touchState.id;
+      const dx = x - touchState.x;
+      const dy = y - touchState.y;
+      if (Math.abs(dx) < 5 && Math.abs(dy) < 5) {
+        return;
+      } else {
+        setMatrix(
+          swipeCell(matrixRef.current, id, positionDeltaToDirection(dx, dy))
+        );
+        setDirty(true);
+        setTouchState(null);
+      }
     },
-    [matrixRef, setMatrix]
+    [touchState, setMatrix, setDirty]
+  );
+
+  const onPressEnd = useCallback(
+    (x: number, y: number) => {
+      console.log("onPressEnd", { x, y });
+      if (!touchState) return;
+      const id = touchState.id;
+      const dx = x - touchState.x;
+      const dy = y - touchState.y;
+      if (Math.abs(dx) < 5 && Math.abs(dy) < 5) {
+        setMatrix(clickCell(matrixRef.current, id));
+        setDirty(true);
+      } else {
+        setMatrix(
+          swipeCell(matrixRef.current, id, positionDeltaToDirection(dx, dy))
+        );
+        setDirty(true);
+      }
+      setTouchState(null);
+    },
+    [touchState, setMatrix, setDirty, setTouchState]
+  );
+
+  const onMouseDown = useCallback(
+    (event: React.MouseEvent<HTMLDivElement>) => {
+      const target = event.target as HTMLDivElement;
+      const id = target.dataset.id;
+      if (!id) return;
+      onPressStart(id, event.clientX, event.clientY);
+    },
+    [onPressStart]
+  );
+
+  const onMouseMove = useCallback(
+    (event: React.MouseEvent<HTMLDivElement>) => {
+      onPressMove(event.clientX, event.clientY);
+    },
+    [onPressMove]
+  );
+
+  const onMouseUp = useCallback(
+    (event: React.MouseEvent<HTMLDivElement>) => {
+      onPressEnd(event.clientX, event.clientY);
+    },
+    [onPressEnd]
+  );
+
+  const onTouchStart = useCallback(
+    (event: React.TouchEvent<HTMLDivElement>) => {
+      console.log("onTouchStart", { event });
+      const target = event.target as HTMLDivElement;
+      const id = target.dataset.id;
+      console.log("onTouchStart", { id, touches: event.touches });
+      if (!id) return;
+      onPressStart(id, event.touches[0].clientX, event.touches[0].clientY);
+    },
+    [onPressStart]
+  );
+
+  const onTouchMove = useCallback(
+    (event: React.TouchEvent<HTMLDivElement>) => {
+      console.log("onTouchMove", { touches: event.touches });
+      onPressMove(event.touches[0].clientX, event.touches[0].clientY);
+    },
+    [onPressMove]
+  );
+  const onTouchEnd = useCallback(
+    (event: React.TouchEvent<HTMLDivElement>) => {
+      console.log("onTouchEnd", {
+        touches: event.touches,
+        changedTouches: event.changedTouches,
+      });
+      onPressEnd(
+        event.changedTouches[0].clientX,
+        event.changedTouches[0].clientY
+      );
+    },
+    [onPressEnd]
   );
 
   return (
-    <div className="relative w-[375px] h-[700px] mx-auto transform-gpu select-none overflow-hidden lg:overflow-visible">
-      {matrix.map((col, x) =>
-        col.map((cell, y) => {
-          if (cell.type === CellType.Spawning) {
-            return (
-              <div
-                key={cell.id}
-                data-id={cell.id}
-                className={`absolute ${bgColor(
-                  cell.color
-                )} rounded-xl w-[70px] h-[70px] transition-all ease-spring duration-300`}
-                style={{
-                  top: -75 + 2,
-                  left: x * 75 + 2,
-                }}
-              ></div>
-            );
-          } else if (
-            cell.type === CellType.Dropped ||
-            cell.type === CellType.Idle
-          ) {
-            return (
-              <div
-                key={cell.id}
-                data-id={cell.id}
-                onTouchStart={onTap}
-                onMouseDown={onClick}
-                className={`absolute ${bgColor(
-                  cell.color
-                )} rounded-xl w-[70px] h-[70px] cursor-pointer opacity-1 scale-100 transition-all ease-spring duration-300`}
-                style={{
-                  top: y * 75 + 2,
-                  left: x * 75 + 2,
-                }}
-              ></div>
-            );
-          } else if (cell.type === CellType.Clicked) {
-            return (
-              <div
-                key={cell.id}
-                data-id={cell.id}
-                className={`absolute ${bgColor(
-                  cell.color
-                )} rounded-xl w-[70px] h-[70px] cursor-pointer opacity-0 scale-0 transition-all ease-spring duration-300`}
-                style={{
-                  top: y * 75 + 2,
-                  left: x * 75 + 2,
-                }}
-              ></div>
-            );
-          } else if (cell.type === CellType.Fusion) {
-            return (
-              <div
-                key={cell.id}
-                data-id={cell.id}
-                className={`absolute ${bgColor(cell.color)} rounded-xl ${
-                  cell.direction === FusionDirection.Horizontal
-                    ? "w-[90px] h-[0px] ml-[-10px] mt-[35px]"
-                    : "w-[0px] h-[90px] ml-[35px] mt-[-10px]"
-                } cursor-pointer opacity-1 scale-100 transition-all ease-spring duration-300`}
-                style={{
-                  top: y * 75 + 2,
-                  left: x * 75 + 2,
-                }}
-              ></div>
-            );
-          } else if (cell.type === CellType.ScoreEnter) {
-            return (
-              <div
-                key={cell.id}
-                data-id={cell.id}
-                className={`absolute ${bgColor(
-                  cell.color
-                )} bg-transparent text-4xl font-bold rounded-xl w-[70px] h-[70px] cursor-pointer scale-1 transition-all ease-spring duration-300`}
-                style={{
-                  top: y * 75 + 2,
-                  left: x * 75 + 2,
-                }}
-              >
-                {cell.score}
-              </div>
-            );
-          } else if (cell.type === CellType.ScoreExit) {
-            return (
-              <div
-                key={cell.id}
-                data-id={cell.id}
-                className={`absolute ${bgColor(
-                  cell.color
-                )} bg-transparent text-8xl font-bold rounded-xl w-[70px] h-[70px] cursor-pointer opacity-0 transition-all ease-spring duration-300`}
-                style={{
-                  top: y * 75 + 2,
-                  left: x * 75 + 2,
-                }}
-              >
-                {cell.score}
-              </div>
-            );
-          } else if (cell.type === CellType.Bomb) {
-            return (
-              <div
-                key={cell.id}
-                data-id={cell.id}
-                onTouchStart={onTap}
-                onMouseDown={onClick}
-                className={`absolute ${bgColor(
-                  cell.color
-                )} rounded-full w-[70px] h-[70px] cursor-pointer transition-all ease-spring duration-300`}
-                style={{
-                  top: y * 75 + 2,
-                  left: x * 75 + 2,
-                }}
-              ></div>
-            );
-          } else if (cell.type === CellType.BombIgnited) {
-            return (
-              <div
-                key={cell.id}
-                data-id={cell.id}
-                className={`absolute ${bgColor(
-                  cell.color
-                )} rounded-full w-[70px] h-[70px] opacity-1 transition-all ease-spring duration-300 scale-50 animate-pulse`}
-                style={{
-                  top: y * 75 + 2,
-                  left: x * 75 + 2,
-                }}
-              ></div>
-            );
-          } else if (cell.type === CellType.BombDetonated) {
-            return (
-              <div
-                key={cell.id}
-                data-id={cell.id}
-                className={`absolute ${bgColor(
-                  cell.color
-                )} rounded-sm w-[70px] h-[70px] opacity-1 transition-all ease-spring duration-300 opacity-0 scale-[3]`}
-                style={{
-                  top: y * 75 + 2,
-                  left: x * 75 + 2,
-                }}
-              ></div>
-            );
-          } else {
-            return <></>;
-          }
-        })
-      )}
+    <div
+      className="relative w-[375px] h-[700px] mx-auto transform-gpu select-none overflow-hidden lg:overflow-visible"
+      onMouseDown={onMouseDown}
+      onMouseMove={onMouseMove}
+      onMouseUp={onMouseUp}
+      onTouchStart={onTouchStart}
+      onTouchMove={onTouchMove}
+      onTouchEnd={onTouchEnd}
+    >
+      {cellsWithPosition(matrix).map(({ cell, x, y }) => {
+        if (cell.type === CellType.Spawning) {
+          return (
+            <div
+              key={cell.id}
+              data-id={cell.id}
+              className={`absolute ${bgColor(
+                cell.color
+              )} rounded-xl w-[70px] h-[70px] transition-all ease-spring duration-300`}
+              style={{
+                top: -75 + 2,
+                left: x * 75 + 2,
+              }}
+            ></div>
+          );
+        } else if (
+          cell.type === CellType.Dropped ||
+          cell.type === CellType.Idle
+        ) {
+          return (
+            <div
+              key={cell.id}
+              data-id={cell.id}
+              className={`absolute ${bgColor(
+                cell.color
+              )} rounded-xl w-[70px] h-[70px] cursor-pointer opacity-1 scale-100 transition-all ease-spring duration-300`}
+              style={{
+                top: y * 75 + 2,
+                left: x * 75 + 2,
+              }}
+            ></div>
+          );
+        } else if (cell.type === CellType.Clicked) {
+          return (
+            <div
+              key={cell.id}
+              data-id={cell.id}
+              className={`absolute ${bgColor(
+                cell.color
+              )} rounded-xl w-[70px] h-[70px] cursor-pointer opacity-0 scale-0 transition-all ease-spring duration-300`}
+              style={{
+                top: y * 75 + 2,
+                left: x * 75 + 2,
+              }}
+            ></div>
+          );
+        } else if (cell.type === CellType.Fusion) {
+          return (
+            <div
+              key={cell.id}
+              data-id={cell.id}
+              className={`absolute ${bgColor(cell.color)} rounded-xl ${
+                cell.direction === FusionDirection.Horizontal
+                  ? "w-[90px] h-[0px] ml-[-10px] mt-[35px]"
+                  : "w-[0px] h-[90px] ml-[35px] mt-[-10px]"
+              } cursor-pointer opacity-1 scale-100 transition-all ease-spring duration-300`}
+              style={{
+                top: y * 75 + 2,
+                left: x * 75 + 2,
+              }}
+            ></div>
+          );
+        } else if (cell.type === CellType.ScoreEnter) {
+          return (
+            <div
+              key={cell.id}
+              data-id={cell.id}
+              className={`absolute ${bgColor(
+                cell.color
+              )} bg-transparent text-4xl font-bold rounded-xl w-[70px] h-[70px] cursor-pointer scale-1 transition-all ease-spring duration-300`}
+              style={{
+                top: y * 75 + 2,
+                left: x * 75 + 2,
+              }}
+            >
+              {cell.score}
+            </div>
+          );
+        } else if (cell.type === CellType.ScoreExit) {
+          return (
+            <div
+              key={cell.id}
+              data-id={cell.id}
+              className={`absolute ${bgColor(
+                cell.color
+              )} bg-transparent text-8xl font-bold rounded-xl w-[70px] h-[70px] cursor-pointer opacity-0 transition-all ease-spring duration-300`}
+              style={{
+                top: y * 75 + 2,
+                left: x * 75 + 2,
+              }}
+            >
+              {cell.score}
+            </div>
+          );
+        } else if (cell.type === CellType.Bomb) {
+          return (
+            <div
+              key={cell.id}
+              data-id={cell.id}
+              className={`absolute ${bgColor(
+                cell.color
+              )} rounded-full w-[70px] h-[70px] cursor-pointer transition-all ease-spring duration-300`}
+              style={{
+                top: y * 75 + 2,
+                left: x * 75 + 2,
+              }}
+            ></div>
+          );
+        } else if (cell.type === CellType.BombIgnited) {
+          return (
+            <div
+              key={cell.id}
+              data-id={cell.id}
+              className={`absolute ${bgColor(
+                cell.color
+              )} rounded-full w-[70px] h-[70px] opacity-1 transition-all ease-spring duration-300 scale-50 animate-pulse`}
+              style={{
+                top: y * 75 + 2,
+                left: x * 75 + 2,
+              }}
+            ></div>
+          );
+        } else if (cell.type === CellType.BombDetonated) {
+          return (
+            <div
+              key={cell.id}
+              data-id={cell.id}
+              className={`absolute ${bgColor(
+                cell.color
+              )} rounded-sm w-[70px] h-[70px] opacity-1 transition-all ease-spring duration-300 opacity-0 scale-[3]`}
+              style={{
+                top: y * 75 + 2,
+                left: x * 75 + 2,
+              }}
+            ></div>
+          );
+        } else {
+          return <></>;
+        }
+      })}
     </div>
   );
 }
