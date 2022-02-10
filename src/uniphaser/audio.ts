@@ -16,6 +16,7 @@ function selectRandom(array: string[]): string {
 
 async function preload(path: string) {
   const a = new Audio(path);
+  a.preload = "auto";
   a.load();
   return new Promise((resolve) => {
     a.onload = resolve;
