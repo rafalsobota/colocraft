@@ -167,12 +167,6 @@ function clickCell(matrix: Matrix, id: string): Matrix {
     };
     audio.click();
     return [...matrix];
-  } else if (cell.type === CellType.Bomb) {
-    matrix[x][y] = {
-      ...cell,
-      type: CellType.BombIgnited,
-    };
-    return [...matrix];
   } else {
     return matrix;
   }
@@ -257,7 +251,11 @@ function mutateCell(cell: Cell, x: number, y: number, matrix: Matrix): Cell {
       ...cell,
       type: CellType.Dropped,
     };
-  } else if (cell.type === CellType.Idle || cell.type === CellType.Dropped) {
+  } else if (
+    cell.type === CellType.Idle ||
+    cell.type === CellType.Dropped ||
+    cell.type === CellType.Bomb
+  ) {
     const color = cell.color;
 
     const h = [
@@ -277,28 +275,39 @@ function mutateCell(cell: Cell, x: number, y: number, matrix: Matrix): Cell {
     const horizontalFusion = (h[0] && h[1]) || (h[1] && h[2]) || (h[2] && h[3]);
 
     if (horizontalFusion && verticalFusion) {
-      audio.bombCreated();
-      return {
-        ...cell,
-        type: CellType.Bomb,
-      };
-    } else if (horizontalFusion) {
-      audio.fusion();
-      return {
-        ...cell,
-        type: CellType.Fusion,
-        direction: FusionDirection.Horizontal,
-        score: 1,
-      };
-    } else if (verticalFusion) {
-      audio.fusion();
-      return {
-        ...cell,
-        type: CellType.Fusion,
-        direction: FusionDirection.Vertical,
-        score: 1,
-      };
+      if (cell.type === CellType.Bomb) {
+        return {
+          ...cell,
+          type: CellType.BombIgnited,
+        };
+      } else {
+        audio.bombCreated();
+        return {
+          ...cell,
+          type: CellType.Bomb,
+        };
+      }
+    } else if (horizontalFusion || verticalFusion) {
+      if (cell.type === CellType.Bomb) {
+        return {
+          ...cell,
+          type: CellType.BombIgnited,
+        };
+      } else {
+        audio.fusion();
+        return {
+          ...cell,
+          type: CellType.Fusion,
+          direction: horizontalFusion
+            ? FusionDirection.Horizontal
+            : FusionDirection.Vertical,
+          score: 1,
+        };
+      }
     } else {
+      if (cell.type === CellType.Bomb) {
+        return cell;
+      }
       return { ...cell, type: CellType.Idle };
     }
   } else if (cell.type === CellType.Fusion) {
