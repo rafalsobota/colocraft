@@ -4,7 +4,7 @@
 // const FUSION = ["/sounds/Notification sound 5.wav", "/sounds/Notification sound 16.wav"];
 // const FUSION = ; //, "/sounds/collect/Collect star 2.mp3", "/sounds/collect/Collect star 3.mp3", "/sounds/collect/Collect star 4.mp3", "/sounds/collect/Collect star 5.mp3"];
 const FUSION = [/*"/sounds/notifications/Notification sound 3.mp3", */"/sounds/notifications/Notification sound 4.mp3", "/sounds/notifications/Notification sound 10.mp3"].concat(["1", "2", "3"].map((n) => `/sounds/collect/Collect star ${n}.mp3`))
-  .concat(["/sounds/magic_ui/Click.mp3", "/sounds/magic_ui/Click 2.mp3", "/sounds/magic_ui/Click 3.mp3", "/sounds/magic_ui/Click 4.mp3"]);
+  .concat(["/sounds/magic_ui/Click 3.mp3"]);
 
 // const FUSION = ["/sounds/magic_ui/Click.mp3", "/sounds/magic_ui/Click 2.mp3", "/sounds/magic_ui/Click 3.mp3", "/sounds/magic_ui/Click 4.mp3"];
 // const BOMB = ["/sounds/notifications/Notification sound 15.mp3"];
