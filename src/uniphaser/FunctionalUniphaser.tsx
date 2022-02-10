@@ -493,6 +493,8 @@ function FunctionalUniphaser() {
       console.log("onTouchStart", { id, touches: event.touches });
       if (!id) return;
       onPressStart(id, event.touches[0].clientX, event.touches[0].clientY);
+      event.preventDefault();
+      event.stopPropagation();
     },
     [onPressStart]
   );
@@ -501,6 +503,8 @@ function FunctionalUniphaser() {
     (event: React.TouchEvent<HTMLDivElement>) => {
       console.log("onTouchMove", { touches: event.touches });
       onPressMove(event.touches[0].clientX, event.touches[0].clientY);
+      event.preventDefault();
+      event.stopPropagation();
     },
     [onPressMove]
   );
@@ -514,6 +518,8 @@ function FunctionalUniphaser() {
         event.changedTouches[0].clientX,
         event.changedTouches[0].clientY
       );
+      event.preventDefault();
+      event.stopPropagation();
     },
     [onPressEnd]
   );
