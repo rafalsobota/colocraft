@@ -536,7 +536,7 @@ function FunctionalUniphaser() {
               data-id={cell.id}
               className={`absolute ${bgColor(
                 cell.color
-              )} rounded-xl w-[70px] h-[70px] transition-all ease-spring duration-300`}
+              )} rounded-xl w-[70px] h-[70px] transition-all ease-spring duration-300 lg:opacity-0`}
               style={{
                 top: -75 + 2,
                 left: x * 75 + 2,

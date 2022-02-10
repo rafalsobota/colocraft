@@ -3,7 +3,7 @@ import FunctionalUniphaser from "./uniphaser/FunctionalUniphaser";
 
 function App() {
   return (
-    <div className="flex flex-col w-full h-full text-center">
+    <div className="flex flex-col w-full h-full text-center lg:justify-center">
       <FunctionalUniphaser />
     </div>
   );
