@@ -63,7 +63,7 @@ let fusionLock: any = null;
 export function fusion() {
   try {
     if (!fusionLock) {
-      const a = new Audio(selectRandom(FUSION)).play();
+      new Audio(selectRandom(FUSION)).play();
       fusionLock = setTimeout(() => {
         fusionLock = null;
       }, 0);
@@ -109,8 +109,7 @@ export function amazing() {
 
 export function bombExplosion() {
   try {
-    const a = new Audio(selectRandom(BOMB_EXPLOSION));
-    a.play();
+    new Audio(selectRandom(BOMB_EXPLOSION)).play();
   } catch (e) {
 
   }
