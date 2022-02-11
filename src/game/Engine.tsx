@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { formatDate, makeRandomGenerator } from "./crypto";
 
 export enum Color {
   Blue,
@@ -10,10 +11,10 @@ export enum Color {
 
 export const cols = 5;
 export const rows = 8;
-export const moves = 50;
+export const moves = 30;
 
-function randomColor(): Color {
-  return Math.round(Math.random() * 4);
+function randomColor(random: () => number): Color {
+  return Math.round(random() * 4);
 }
 
 export enum CellType {
@@ -294,7 +295,7 @@ function mutateCell(cell: Cell, x: number, y: number, matrix: Matrix): Cell {
   return cell;
 }
 
-function fillGaps(matrix: Matrix): Matrix {
+function fillGaps(matrix: Matrix, random: () => number): Matrix {
   return matrix.map((col) => {
     const filteredRows = col.filter(
       (cell) =>
@@ -304,7 +305,7 @@ function fillGaps(matrix: Matrix): Matrix {
     return [
       ...Array(lackingCellsCount)
         .fill(null)
-        .map(() => createCell()),
+        .map(() => createCell(random)),
       ...filteredRows,
     ];
   });
@@ -343,22 +344,22 @@ function igniteAllBombs(matrix: Matrix): Matrix {
   });
 }
 
-function createCell(): Cell {
+function createCell(random: () => number): Cell {
   return {
     type: CellType.Spawning,
-    color: randomColor(),
-    id: Math.round(Math.random() * 100000000).toString(),
+    color: randomColor(random),
+    id: Math.round(random() * 100000000).toString(),
   };
 }
 
 export type Matrix = Cell[][];
 
-function createMatrix(): Matrix {
+function createMatrix(random: () => number): Matrix {
   const matrix: Matrix = [];
   for (let i = 0; i < cols; i++) {
     matrix.push([]);
     for (let j = 0; j < rows; j++) {
-      matrix[i].push(createCell());
+      matrix[i].push(createCell(random));
     }
   }
   return matrix;
@@ -403,18 +404,31 @@ export function useEngine(): {
   restart: () => void;
   finished: boolean;
 } {
-  const [matrix, setMatrix] = useState(createMatrix());
+  const [iteration, setIteration] = useState(1);
+
+  const today = formatDate(new Date());
+
+  const random = useMemo(() => {
+    return makeRandomGenerator(today);
+    // iteration is used only to reset the random generator
+  }, [today, iteration]);
+
+  const [matrix, setMatrix] = useState<Matrix>([]);
   const [dirty, setDirty] = useState(true);
   const matrixRef = useRef<Matrix>(matrix);
   const scoreRef = useRef<number>(0);
-  const [movesLeft, setMovesLeft] = useState(3);
+  const [movesLeft, setMovesLeft] = useState(moves);
 
-  const restart = useCallback(() => {
-    setMatrix(createMatrix());
+  useEffect(() => {
+    setMatrix(createMatrix(random));
     setDirty(true);
     scoreRef.current = 0;
     setMovesLeft(moves);
-  }, []);
+  }, [setMatrix, setDirty, setMovesLeft, random]);
+
+  const restart = useCallback(() => {
+    setIteration(iteration + 1);
+  }, [iteration, setIteration]);
 
   useEffect(() => {
     matrixRef.current = matrix;
@@ -429,7 +443,7 @@ export function useEngine(): {
     const interval = setInterval(() => {
       let newMatrix = mapCells(matrixRef.current, mutateCell);
       addScore(collectScore(newMatrix));
-      newMatrix = fillGaps(newMatrix);
+      newMatrix = fillGaps(newMatrix, random);
       newMatrix = detonateBombs(newMatrix);
       if (movesLeft < 1) {
         newMatrix = igniteAllBombs(newMatrix);
@@ -441,7 +455,7 @@ export function useEngine(): {
     return () => {
       clearInterval(interval);
     };
-  }, [dirty, movesLeft, setMatrix, addScore]);
+  }, [dirty, movesLeft, setMatrix, addScore, random]);
 
   const onCellSwipe = useCallback(
     (id: string, direction: Direction) => {

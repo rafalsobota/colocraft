@@ -36,8 +36,6 @@ function Game() {
     restart,
   } = useEngine();
 
-  console.log({ score, movesLeft });
-
   const [touchState, setTouchState] = useState<{
     id: string;
     x: number;
@@ -89,6 +87,8 @@ function Game() {
       const id = target.dataset.id;
       if (!id) return;
       onPressStart(id, event.clientX, event.clientY);
+      event.preventDefault();
+      event.stopPropagation();
     },
     [onPressStart]
   );
@@ -96,6 +96,8 @@ function Game() {
   const onMouseMove = useCallback(
     (event: React.MouseEvent<HTMLDivElement>) => {
       onPressMove(event.clientX, event.clientY);
+      event.preventDefault();
+      event.stopPropagation();
     },
     [onPressMove]
   );
@@ -103,6 +105,8 @@ function Game() {
   const onMouseUp = useCallback(
     (event: React.MouseEvent<HTMLDivElement>) => {
       onPressEnd(event.clientX, event.clientY);
+      event.preventDefault();
+      event.stopPropagation();
     },
     [onPressEnd]
   );
@@ -139,11 +143,19 @@ function Game() {
     [onPressEnd]
   );
 
+  const preventDefault = useCallback((event: any) => {
+    event.preventDefault();
+    event.stopPopagation();
+  }, []);
+
   const cursorClass = isInteractive ? "cursor-grab active:cursor-grabbing" : "";
 
   return (
     <div
       className="relative w-[375px] h-[700px] mx-auto transform-gpu select-none"
+      onTouchStartCapture={preventDefault}
+      onTouchEndCapture={preventDefault}
+      onTouchMoveCapture={preventDefault}
       onMouseDown={onMouseDown}
       onMouseMove={onMouseMove}
       onMouseUp={onMouseUp}
