@@ -411,6 +411,7 @@ export function useEngine(): {
   const random = useMemo(() => {
     return makeRandomGenerator(today);
     // iteration is used only to reset the random generator
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [today, iteration]);
 
   const [matrix, setMatrix] = useState<Matrix>([]);
