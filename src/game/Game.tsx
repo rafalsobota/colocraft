@@ -1,5 +1,5 @@
 import { useCallback, useState } from "react";
-import { HeartIcon, LightningBoltIcon } from "@heroicons/react/solid";
+import { LightningBoltIcon, StarIcon } from "@heroicons/react/solid";
 import {
   CellType,
   Color,
@@ -166,11 +166,11 @@ function Game() {
     >
       <Summary isOpen={finished} onRestart={restart} score={score} />
       <div className="absolute top-[600px] left-0 p-1 w-full flex flex-row text-slate-500 dark:text-slate-400 antialiased items-center">
-        <HeartIcon className="h-5 mx-1 text-pink-500" />
+        <StarIcon className="h-5 mx-1 text-green-500" />
         <div className="flex-grow text-left text-slate-800 dark:text-slate-100">
           {score}
         </div>
-        <LightningBoltIcon className="h-4 text-yellow-500" />
+        <LightningBoltIcon className={`h-4 text-yellow-500`} />
         <div>
           <span className="mx-1 text-slate-800 dark:text-slate-100">
             {movesLeft}

@@ -1,5 +1,5 @@
 import { Dialog, Transition } from "@headlessui/react";
-import { HeartIcon, LightningBoltIcon } from "@heroicons/react/solid";
+import { LightningBoltIcon, StarIcon } from "@heroicons/react/solid";
 import { Fragment, useEffect, useRef } from "react";
 
 type SummaryProps = {
@@ -57,7 +57,7 @@ export default function Summary({ isOpen, score, onRestart }: SummaryProps) {
                 as="h3"
                 className="flex items-center text-lg font-medium leading-6 text-gray-900"
               >
-                <HeartIcon className="mr-2 -mt-2 text-pink-500 h-14" />
+                <StarIcon className="mr-2 -mt-1 text-green-500 h-14" />
                 <div className="mr-1 text-5xl font-semibold text-slate-800 dark:text-slate-100">
                   {scoreRef.current}
                 </div>
@@ -71,7 +71,7 @@ export default function Summary({ isOpen, score, onRestart }: SummaryProps) {
                   </span>{" "}
                   Scored
                   <span className="whitespace-nowrap">
-                    <HeartIcon className="inline h-5 mx-1 -mt-1 text-pink-500" />
+                    <StarIcon className="inline h-5 mx-1 -mt-1 text-green-500" />
                     {scoreRef.current}.
                   </span>
                 </span>
