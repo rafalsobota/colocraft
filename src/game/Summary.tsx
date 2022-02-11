@@ -1,6 +1,6 @@
 import { Dialog, Transition } from "@headlessui/react";
 import { HeartIcon, LightningBoltIcon } from "@heroicons/react/solid";
-import { Fragment, useEffect, useRef, useState } from "react";
+import { Fragment, useEffect, useRef } from "react";
 
 type SummaryProps = {
   isOpen: boolean;
