@@ -10,6 +10,7 @@ export enum Color {
 
 export const cols = 5;
 export const rows = 8;
+export const moves = 50;
 
 function randomColor(): Color {
   return Math.round(Math.random() * 4);
@@ -309,12 +310,37 @@ function fillGaps(matrix: Matrix): Matrix {
   });
 }
 
+function collectScore(matrix: Matrix): number {
+  return matrix.reduce((acc, col) => {
+    return (
+      acc +
+      col.reduce((acc, cell) => {
+        if (cell.type === CellType.ScoreExit) {
+          return acc + cell.score;
+        } else {
+          return acc;
+        }
+      }, 0)
+    );
+  }, 0);
+}
+
 function isDirty(matrix: Matrix): boolean {
   return matrix.some((col) =>
     col.some((cell) => {
       return cell.type !== CellType.Idle && cell.type !== CellType.Bomb;
     })
   );
+}
+
+function igniteAllBombs(matrix: Matrix): Matrix {
+  return mapCells(matrix, (cell) => {
+    if (cell.type === CellType.Bomb) {
+      return { ...cell, type: CellType.BombIgnited };
+    } else {
+      return cell;
+    }
+  });
 }
 
 function createCell(): Cell {
@@ -372,49 +398,79 @@ export function useEngine(): {
   onCellSwipe(id: string, direction: Direction): void;
   onCellClick(id: string): void;
   score: number;
+  movesLeft: number;
   isInteractive: boolean;
+  restart: () => void;
+  finished: boolean;
 } {
   const [matrix, setMatrix] = useState(createMatrix());
   const [dirty, setDirty] = useState(true);
   const matrixRef = useRef<Matrix>(matrix);
-  const [score, setScore] = useState(0);
+  const scoreRef = useRef<number>(0);
+  const [movesLeft, setMovesLeft] = useState(moves);
+
+  const restart = useCallback(() => {
+    setMatrix(createMatrix());
+    setDirty(true);
+    scoreRef.current = 0;
+    setMovesLeft(moves);
+  }, []);
 
   useEffect(() => {
     matrixRef.current = matrix;
   }, [matrix]);
 
+  const addScore = useCallback((score: number) => {
+    scoreRef.current += score;
+  }, []);
+
   useEffect(() => {
     if (!dirty) return;
     const interval = setInterval(() => {
-      const newMatrix = detonateBombs(
-        fillGaps(mapCells(matrixRef.current, mutateCell))
-      );
+      let newMatrix = mapCells(matrixRef.current, mutateCell);
+      addScore(collectScore(newMatrix));
+      newMatrix = fillGaps(newMatrix);
+      newMatrix = detonateBombs(newMatrix);
+      if (movesLeft < 1) {
+        newMatrix = igniteAllBombs(newMatrix);
+      }
       setMatrix(newMatrix);
       const newDirty = isDirty(newMatrix);
-      console.log("tick", { newDirty });
       setDirty(newDirty);
-    }, 150);
+    }, 100);
     return () => {
-      console.log("cleanup");
       clearInterval(interval);
     };
-  }, [dirty, setMatrix]);
+  }, [dirty, movesLeft, setMatrix, addScore]);
 
-  const onCellSwipe = useCallback((id: string, direction: Direction) => {
-    setMatrix(swipeCell(matrixRef.current, id, direction));
-    setDirty(true);
-  }, []);
+  const onCellSwipe = useCallback(
+    (id: string, direction: Direction) => {
+      if (dirty || movesLeft < 1) return;
+      setMatrix(swipeCell(matrixRef.current, id, direction));
+      setDirty(true);
+      setMovesLeft(movesLeft - 1);
+    },
+    [dirty, movesLeft, setMovesLeft]
+  );
 
-  const onCellClick = useCallback((id: string) => {
-    setMatrix(clickCell(matrixRef.current, id));
-    setDirty(true);
-  }, []);
+  const onCellClick = useCallback(
+    (id: string) => {
+      if (dirty || movesLeft < 1) return;
+      setMatrix(clickCell(matrixRef.current, id));
+      setDirty(true);
+      setMovesLeft(movesLeft - 1);
+    },
+    [dirty, movesLeft, setMovesLeft]
+  );
 
   return {
     cells: cellsWithPosition(matrix),
     onCellSwipe,
     onCellClick,
-    score,
+    score: scoreRef.current,
+    movesLeft,
     isInteractive: !dirty,
+    restart,
+    finished: movesLeft < 1 && !dirty,
   };
 }

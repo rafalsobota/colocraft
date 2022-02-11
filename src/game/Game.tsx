@@ -1,4 +1,5 @@
 import { useCallback, useState } from "react";
+import { HeartIcon, LightningBoltIcon } from "@heroicons/react/solid";
 import {
   CellType,
   Color,
@@ -6,6 +7,7 @@ import {
   positionDeltaToDirection,
   useEngine,
 } from "./Engine";
+import Summary from "./Summary";
 
 function bgColor(color: Color): string {
   switch (color) {
@@ -23,7 +25,18 @@ function bgColor(color: Color): string {
 }
 
 function Game() {
-  const { cells, onCellSwipe, onCellClick } = useEngine();
+  const {
+    cells,
+    onCellSwipe,
+    onCellClick,
+    score,
+    isInteractive,
+    movesLeft,
+    finished,
+    restart,
+  } = useEngine();
+
+  console.log({ score, movesLeft });
 
   const [touchState, setTouchState] = useState<{
     id: string;
@@ -126,9 +139,11 @@ function Game() {
     [onPressEnd]
   );
 
+  const cursorClass = isInteractive ? "cursor-grab active:cursor-grabbing" : "";
+
   return (
     <div
-      className="relative w-[375px] h-[700px] mx-auto transform-gpu select-none overflow-hidden lg:overflow-visible"
+      className="relative w-[375px] h-[700px] mx-auto transform-gpu select-none overflow-hidden sm:overflow-visible"
       onMouseDown={onMouseDown}
       onMouseMove={onMouseMove}
       onMouseUp={onMouseUp}
@@ -136,6 +151,20 @@ function Game() {
       onTouchMove={onTouchMove}
       onTouchEnd={onTouchEnd}
     >
+      <Summary isOpen={finished} onRestart={restart} score={score} />
+      <div className="absolute top-[600px] left-0 p-1 w-full flex flex-row text-slate-500 dark:text-slate-400 antialiased items-center">
+        <HeartIcon className="h-5 mx-1 text-pink-500" />
+        <div className="flex-grow text-left text-slate-800 dark:text-slate-100">
+          {score}
+        </div>
+        <LightningBoltIcon className="h-4 text-yellow-500" />
+        <div>
+          <span className="mx-1 text-slate-800 dark:text-slate-100">
+            {movesLeft}
+          </span>{" "}
+        </div>
+      </div>
+
       {cells.map(({ cell, x, y }) => {
         if (cell.type === CellType.Spawning) {
           return (
@@ -144,7 +173,7 @@ function Game() {
               data-id={cell.id}
               className={`absolute ${bgColor(
                 cell.color
-              )} rounded-xl w-[70px] h-[70px] transition-all ease-spring duration-300 lg:opacity-0`}
+              )} rounded-xl w-[70px] h-[70px] transition-all ease-spring duration-300 opacity-0`}
               style={{
                 top: -75 + 2,
                 left: x * 75 + 2,
@@ -161,7 +190,7 @@ function Game() {
               data-id={cell.id}
               className={`absolute ${bgColor(
                 cell.color
-              )} rounded-xl w-[70px] h-[70px] cursor-pointer opacity-1 scale-100 transition-all ease-spring duration-300`}
+              )} rounded-xl w-[70px] h-[70px] ${cursorClass} opacity-1 scale-100 transition-all ease-spring duration-300`}
               style={{
                 top: y * 75 + 2,
                 left: x * 75 + 2,
@@ -175,7 +204,7 @@ function Game() {
               data-id={cell.id}
               className={`absolute ${bgColor(
                 cell.color
-              )} rounded-xl w-[70px] h-[70px] cursor-pointer opacity-0 scale-0 transition-all ease-spring duration-300`}
+              )} rounded-xl w-[70px] h-[70px] opacity-0 scale-0 transition-all ease-spring duration-300`}
               style={{
                 top: y * 75 + 2,
                 left: x * 75 + 2,
@@ -191,7 +220,7 @@ function Game() {
                 cell.direction === FusionDirection.Horizontal
                   ? "w-[90px] h-[0px] ml-[-10px] mt-[35px]"
                   : "w-[0px] h-[90px] ml-[35px] mt-[-10px]"
-              } cursor-pointer opacity-1 scale-100 transition-all ease-spring duration-300`}
+              } opacity-1 scale-100 transition-all ease-spring duration-300`}
               style={{
                 top: y * 75 + 2,
                 left: x * 75 + 2,
@@ -205,7 +234,7 @@ function Game() {
               data-id={cell.id}
               className={`absolute ${bgColor(
                 cell.color
-              )} bg-transparent text-4xl font-bold rounded-xl w-[70px] h-[70px] cursor-pointer scale-1 transition-all ease-spring duration-300`}
+              )} bg-transparent text-4xl font-bold rounded-xl w-[70px] h-[70px] scale-1 transition-all ease-spring duration-300`}
               style={{
                 top: y * 75 + 2,
                 left: x * 75 + 2,
@@ -221,7 +250,7 @@ function Game() {
               data-id={cell.id}
               className={`absolute ${bgColor(
                 cell.color
-              )} bg-transparent text-8xl font-bold rounded-xl w-[70px] h-[70px] cursor-pointer opacity-0 transition-all ease-spring duration-300`}
+              )} bg-transparent text-8xl font-bold rounded-xl w-[70px] h-[70px] opacity-0 transition-all ease-spring duration-300`}
               style={{
                 top: y * 75 + 2,
                 left: x * 75 + 2,
@@ -237,7 +266,7 @@ function Game() {
               data-id={cell.id}
               className={`absolute ${bgColor(
                 cell.color
-              )} rounded-full w-[70px] h-[70px] cursor-pointer transition-all ease-spring duration-300`}
+              )} rounded-full w-[70px] h-[70px] ${cursorClass} transition-all ease-spring duration-300`}
               style={{
                 top: y * 75 + 2,
                 left: x * 75 + 2,

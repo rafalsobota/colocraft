@@ -16,4 +16,7 @@ body,
 body {
   @apply bg-white dark:bg-slate-900;
   overflow: hidden;
+  font-family: "Inter", sans-serif;
 }
+
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap");

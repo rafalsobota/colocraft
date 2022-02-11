@@ -1,5 +1,6 @@
 import React from "react";
 import Game from "./game/Game";
+import Summary from "./game/Summary";
 
 function App() {
   return (
