@@ -62,30 +62,29 @@ export default function Summary({ isOpen, score, onRestart }: SummaryProps) {
                   {scoreRef.current}
                 </div>
               </Dialog.Title>
-              <div className="mt-2 text-gray-500 text-md dark:text-slate-300">
+              <div className="mt-2 text-gray-500 text-md dark:text-slate-400">
                 <span>
                   Run out of
                   <span className="whitespace-nowrap">
-                    <LightningBoltIcon className="inline-block h-4 mx-1 text-yellow-500" />
+                    <LightningBoltIcon className="inline h-4 mx-1 -mt-1 text-yellow-500" />
                     moves.
                   </span>{" "}
-                  You scored
+                  Scored
                   <span className="whitespace-nowrap">
-                    <HeartIcon className="inline-block h-5 mx-1 text-pink-500" />
-                    {scoreRef.current}
-                  </span>{" "}
-                  hearts.
+                    <HeartIcon className="inline h-5 mx-1 -mt-1 text-pink-500" />
+                    {scoreRef.current}.
+                  </span>
                 </span>
               </div>
 
               <div className="mt-4 text-right">
                 <button
                   type="button"
-                  className="inline-flex justify-center px-4 py-2 text-sm font-medium text-white border border-transparent rounded-md bg-sky-500 active:bg-sky-600 focus:outline-none focus-visible:ring-4 focus-visible:ring-sky-300"
-                  onClick={onRestart}
-                  onTouchStart={onRestart}
+                  className="inline-flex justify-center px-6 py-4 text-sm font-medium text-white border border-transparent bg-sky-500 rounded-xl active:bg-sky-600 focus:outline-none focus-visible:ring-4 focus-visible:ring-sky-300"
+                  onMouseUp={onRestart}
+                  onTouchEnd={onRestart}
                 >
-                  Try Again
+                  Play Again
                 </button>
               </div>
             </div>

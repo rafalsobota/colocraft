@@ -407,7 +407,7 @@ export function useEngine(): {
   const [dirty, setDirty] = useState(true);
   const matrixRef = useRef<Matrix>(matrix);
   const scoreRef = useRef<number>(0);
-  const [movesLeft, setMovesLeft] = useState(moves);
+  const [movesLeft, setMovesLeft] = useState(3);
 
   const restart = useCallback(() => {
     setMatrix(createMatrix());
