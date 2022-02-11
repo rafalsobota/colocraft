@@ -8,6 +8,7 @@ import {
   useEngine,
 } from "./Engine";
 import Summary from "./Summary";
+import { isFacebookApp } from "./system";
 
 function bgColor(color: Color): string {
   switch (color) {
@@ -185,7 +186,9 @@ function Game() {
               data-id={cell.id}
               className={`absolute ${bgColor(
                 cell.color
-              )} rounded-xl w-[70px] h-[70px] transition-all ease-spring duration-300 opacity-0`}
+              )} rounded-xl w-[70px] h-[70px] transition-all ease-spring duration-300 ${
+                isFacebookApp() ? "" : "opacity-0"
+              }`}
               style={{
                 top: -75 + 2,
                 left: x * 75 + 2,
