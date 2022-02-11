@@ -143,7 +143,7 @@ function Game() {
 
   return (
     <div
-      className="relative w-[375px] h-[700px] mx-auto transform-gpu select-none overflow-hidden sm:overflow-visible"
+      className="relative w-[375px] h-[700px] mx-auto transform-gpu select-none"
       onMouseDown={onMouseDown}
       onMouseMove={onMouseMove}
       onMouseUp={onMouseUp}
