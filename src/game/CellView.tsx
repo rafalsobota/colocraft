@@ -22,14 +22,25 @@ export function CellView({
   y,
   isInteractive,
   transitionDuration,
+  finished,
 }: {
   cell: Cell;
   x: number;
   y: number;
   isInteractive?: boolean;
   transitionDuration: number;
+  finished: boolean;
 }) {
   const cursorClass = isInteractive ? "cursor-grab active:cursor-grabbing" : "";
+  const finishedClasses = finished
+    ? "scale-50 opacity-10"
+    : "scale-100 ease-spring";
+
+  const styles = {
+    top: cell.type === CellType.Spawning ? -75 + 2 : y * 75 + 2,
+    left: finished ? cell.color * 75 + 2 : x * 75 + 2,
+    transitionDuration: transitionDuration + "ms",
+  };
 
   if (cell.type === CellType.Spawning) {
     return (
@@ -40,11 +51,7 @@ export function CellView({
         )} rounded-xl w-[70px] h-[70px] transition-all ease-spring ${
           slowMobileBrowser() ? "" : "opacity-0"
         }`}
-        style={{
-          top: -75 + 2,
-          left: x * 75 + 2,
-          transitionDuration: transitionDuration + "ms",
-        }}
+        style={styles}
       ></div>
     );
   } else if (cell.type === CellType.Dropped || cell.type === CellType.Idle) {
@@ -53,12 +60,8 @@ export function CellView({
         data-id={cell.id}
         className={`absolute ${bgColor(
           cell.color
-        )} rounded-xl w-[70px] h-[70px] ${cursorClass} opacity-1 scale-100 transition-all ease-spring`}
-        style={{
-          top: y * 75 + 2,
-          left: x * 75 + 2,
-          transitionDuration: transitionDuration + "ms",
-        }}
+        )} rounded-xl w-[70px] h-[70px] ${cursorClass} opacity-1  transition-all ${finishedClasses}`}
+        style={styles}
       ></div>
     );
   } else if (cell.type === CellType.Clicked) {
@@ -68,11 +71,7 @@ export function CellView({
         className={`absolute ${bgColor(
           cell.color
         )} rounded-xl w-[70px] h-[70px] opacity-0 scale-0 transition-all ease-spring`}
-        style={{
-          top: y * 75 + 2,
-          left: x * 75 + 2,
-          transitionDuration: transitionDuration + "ms",
-        }}
+        style={styles}
       ></div>
     );
   } else if (cell.type === CellType.Fusion) {
@@ -84,11 +83,7 @@ export function CellView({
             ? "w-[90px] h-[0px] ml-[-10px] mt-[35px]"
             : "w-[0px] h-[90px] ml-[35px] mt-[-10px]"
         } opacity-1 scale-100 transition-all ease-spring`}
-        style={{
-          top: y * 75 + 2,
-          left: x * 75 + 2,
-          transitionDuration: transitionDuration + "ms",
-        }}
+        style={styles}
       ></div>
     );
   } else if (cell.type === CellType.ScoreEnter) {
@@ -98,11 +93,7 @@ export function CellView({
         className={`absolute ${bgColor(
           cell.color
         )} bg-transparent text-4xl font-bold rounded-xl w-[70px] h-[70px] scale-1 transition-all ease-spring`}
-        style={{
-          top: y * 75 + 2,
-          left: x * 75 + 2,
-          transitionDuration: transitionDuration + "ms",
-        }}
+        style={styles}
       >
         {cell.score}
       </div>
@@ -114,11 +105,7 @@ export function CellView({
         className={`absolute ${bgColor(
           cell.color
         )} bg-transparent text-8xl font-bold rounded-xl w-[70px] h-[70px] opacity-0 transition-all ease-spring`}
-        style={{
-          top: y * 75 + 2,
-          left: x * 75 + 2,
-          transitionDuration: transitionDuration + "ms",
-        }}
+        style={styles}
       >
         {cell.score}
       </div>
@@ -130,11 +117,7 @@ export function CellView({
         className={`absolute ${bgColor(
           cell.color
         )} rounded-full w-[70px] h-[70px] ${cursorClass} transition-all ease-spring`}
-        style={{
-          top: y * 75 + 2,
-          left: x * 75 + 2,
-          transitionDuration: transitionDuration + "ms",
-        }}
+        style={styles}
       ></div>
     );
   } else if (cell.type === CellType.BombIgnited) {
@@ -157,11 +140,7 @@ export function CellView({
         className={`absolute ${bgColor(
           cell.color
         )} rounded-sm w-[70px] h-[70px] opacity-1 transition-all ease-spring opacity-0 scale-[3]`}
-        style={{
-          top: y * 75 + 2,
-          left: x * 75 + 2,
-          transitionDuration: transitionDuration + "ms",
-        }}
+        style={styles}
       ></div>
     );
   } else {

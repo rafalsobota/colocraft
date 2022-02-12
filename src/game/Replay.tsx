@@ -1,13 +1,30 @@
 import React, { useCallback } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { LightningBoltIcon, PlayIcon, StarIcon } from "@heroicons/react/solid";
 import { CellView } from "./CellView";
 import useReplayEngine from "./ReplayEngine";
 import { replayIdToMoves } from "./encoding";
 import ReplaySummary from "./Summary";
+import { formatDate } from "./random";
 
-export function makeReplayLink(dateString: string, movesId: string) {
-  return `${window.location.protocol}//${window.location.host}/replay/${dateString}/${movesId}`;
+export function makeReplayHref(dateString: string, movesId: string) {
+  return `${window.location.protocol}//${window.location.host}${makeReplayPath(
+    dateString,
+    movesId
+  )}`.replace("//", "/");
+}
+
+export function makeReplayPath(dateString: string, movesId: string) {
+  return `/replay/${dateString}/${movesId}`;
+}
+
+export function makeReplayMessage(
+  dateString: string,
+  movesId: string,
+  score: number
+) {
+  const replayLink = makeReplayHref(dateString, movesId);
+  return `⭐ ${score} - ${replayLink}`;
 }
 
 function Replay() {
@@ -19,13 +36,21 @@ function Replay() {
       dateString,
     });
 
+  const navigate = useNavigate();
+
   const onRestart = useCallback(() => {
-    window.location.pathname = "/";
-  }, []);
+    navigate("/");
+  }, [navigate]);
 
   const onCopyReplayLink = useCallback(() => {
-    navigator.clipboard.writeText(`${window.location.href}`);
-  }, []);
+    if (!movesId) return;
+    const message = makeReplayMessage(
+      dateString || formatDate(new Date()),
+      movesId,
+      score
+    );
+    navigator.clipboard.writeText(message);
+  }, [movesId, score, dateString]);
 
   return (
     <div className="flex flex-col justify-center w-full h-full text-center">
@@ -73,6 +98,7 @@ function Replay() {
               y={y}
               isInteractive={isInteractive}
               transitionDuration={400}
+              finished={finished}
             />
           );
         })}

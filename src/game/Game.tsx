@@ -5,6 +5,8 @@ import Summary from "./Summary";
 import { CellView } from "./CellView";
 import { movesToReplayId } from "./encoding";
 import { formatDate } from "./random";
+import { makeReplayMessage, makeReplayPath } from "./Replay";
+import { useNavigate } from "react-router-dom";
 
 function Game() {
   const {
@@ -18,6 +20,8 @@ function Game() {
     restart,
     previousMoves,
   } = useEngine({ interval: 100 });
+
+  const navigate = useNavigate();
 
   const [touchState, setTouchState] = useState<{
     id: string;
@@ -116,15 +120,17 @@ function Game() {
 
   const onReplay = useCallback(() => {
     const replayId = movesToReplayId(previousMoves);
-    window.location.pathname = `/replay/${formatDate(new Date())}/${replayId}`;
-  }, [previousMoves]);
+    navigate(makeReplayPath(formatDate(new Date()), replayId));
+  }, [previousMoves, navigate]);
 
   const onCopyReplayLink = useCallback(() => {
-    const replayId = movesToReplayId(previousMoves);
-    navigator.clipboard.writeText(
-      `${window.location.href}/replay/${formatDate(new Date())}/${replayId}`
+    const message = makeReplayMessage(
+      formatDate(new Date()),
+      movesToReplayId(previousMoves),
+      score
     );
-  }, [previousMoves]);
+    navigator.clipboard.writeText(message);
+  }, [previousMoves, score]);
 
   return (
     <div className="flex flex-col justify-center w-full h-full text-center">
@@ -157,19 +163,6 @@ function Game() {
           </div>
         </div>
 
-        {/* <div className="absolute top-[650px] left-0 p-1 w-full flex flex-row text-slate-500 dark:text-slate-400 antialiased items-center">
-          <ul>
-            {[...previousMoves].map((move, i) => (
-              <li key={i}>
-                {move.x}:{move.y}{" "}
-                {move.direction
-                  ? ["tap", "up", "down", "left", "right"][move.direction]
-                  : "tap"}
-              </li>
-            ))}
-          </ul>
-        </div> */}
-
         {cells.map(({ cell, x, y }) => {
           return (
             <CellView
@@ -179,6 +172,7 @@ function Game() {
               y={y}
               isInteractive={isInteractive}
               transitionDuration={300}
+              finished={finished}
             />
           );
         })}

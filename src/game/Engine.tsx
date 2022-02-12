@@ -11,7 +11,7 @@ export enum Color {
 
 export const cols = 5;
 export const rows = 8;
-export const moves = 30;
+export const moves = 3;
 
 function randomColor(random: () => number): Color {
   return Math.round(random() * 4);
