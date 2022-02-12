@@ -15,7 +15,7 @@ export default function ReplayMenu({
   return (
     <Menu as="div" className="relative inline-block text-left">
       <div>
-        <Menu.Button className="inline-flex justify-center w-full px-8 py-4 text-sm font-medium bg-white border rounded-md text-sky-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75 border-sky-500 active:border-sky-600">
+        <Menu.Button className="inline-flex justify-center w-full px-8 py-4 text-sm font-medium bg-white border rounded-xl text-sky-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75 border-sky-500 active:border-sky-600">
           Replay
           <ChevronDownIcon
             className="w-5 h-5 ml-2 -mr-1 text-sky-500 active:text-sky-600"
