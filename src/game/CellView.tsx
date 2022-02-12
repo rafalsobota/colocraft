@@ -1,5 +1,5 @@
 import { Cell, CellType, Color, FusionDirection } from "./Engine";
-import { isFacebookApp } from "./system";
+import { slowMobileBrowser } from "./system";
 
 function bgColor(color: Color): string {
   switch (color) {
@@ -38,7 +38,7 @@ export function CellView({
         className={`absolute ${bgColor(
           cell.color
         )} rounded-xl w-[70px] h-[70px] transition-all ease-spring ${
-          isFacebookApp() ? "" : "opacity-0"
+          slowMobileBrowser() ? "" : "opacity-0"
         }`}
         style={{
           top: -75 + 2,
