@@ -1,6 +1,6 @@
 import React, { useCallback } from "react";
 import { useParams } from "react-router-dom";
-import { LightningBoltIcon, StarIcon } from "@heroicons/react/solid";
+import { LightningBoltIcon, PlayIcon, StarIcon } from "@heroicons/react/solid";
 import { CellView } from "./CellView";
 import useReplayEngine from "./ReplayEngine";
 import { replayIdToMoves } from "./encoding";
@@ -38,9 +38,20 @@ function Replay() {
           <div className="text-left text-slate-800 dark:text-slate-100">
             {score}
           </div>
-          <div className="flex-grow font-semibold text-red-500 animate-pulse">
+          <div className="flex-grow"></div>
+          <PlayIcon
+            className={`h-5 mx-1 text-pink-500 ${
+              finished ? "opacity-0" : "animate-pulse"
+            }`}
+          />
+          <div
+            className={`font-semibold text-pink-500 ${
+              finished ? "opacity-0" : "animate-pulse"
+            }`}
+          >
             Replay
           </div>
+          <div className="flex-grow"></div>
           <LightningBoltIcon className={`h-4 text-yellow-500`} />
           <div>
             <span className="mx-1 text-slate-800 dark:text-slate-100">
