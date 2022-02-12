@@ -7,11 +7,12 @@ import { replayIdToMoves } from "./encoding";
 import ReplaySummary from "./Summary";
 
 function Replay() {
-  const { replay } = useParams();
+  const { movesId, dateString } = useParams();
   const { cells, score, isInteractive, movesLeft, finished, restart } =
     useReplayEngine({
-      moves: replay ? replayIdToMoves(replay) : [],
+      moves: movesId ? replayIdToMoves(movesId) : [],
       interval: 300,
+      dateString,
     });
 
   const onRestart = useCallback(() => {

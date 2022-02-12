@@ -37,7 +37,8 @@ export default function ReplayMenu({
             <Menu.Item>
               {({ active }) => (
                 <button
-                  onClick={onWatchReplay}
+                  onMouseDown={onWatchReplay}
+                  onTouchStart={onWatchReplay}
                   className={`${
                     active ? "bg-sky-500 text-white" : "text-gray-900"
                   } group flex rounded-md items-center w-full px-2 py-2 text-sm`}
@@ -53,7 +54,8 @@ export default function ReplayMenu({
             <Menu.Item>
               {({ active }) => (
                 <button
-                  onClick={onCopyReplayLink}
+                  onMouseDown={onCopyReplayLink}
+                  onTouchStart={onCopyReplayLink}
                   className={`${
                     active ? "bg-sky-500 text-white" : "text-gray-900"
                   } group flex rounded-md items-center w-full px-2 py-2 text-sm`}

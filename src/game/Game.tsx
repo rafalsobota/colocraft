@@ -70,8 +70,6 @@ function Game() {
       const id = target.dataset.id;
       if (!id) return;
       onPressStart(id, event.clientX, event.clientY);
-      event.preventDefault();
-      event.stopPropagation();
     },
     [onPressStart]
   );
@@ -79,8 +77,6 @@ function Game() {
   const onMouseMove = useCallback(
     (event: React.MouseEvent<HTMLDivElement>) => {
       onPressMove(event.clientX, event.clientY);
-      event.preventDefault();
-      event.stopPropagation();
     },
     [onPressMove]
   );
@@ -88,8 +84,6 @@ function Game() {
   const onMouseUp = useCallback(
     (event: React.MouseEvent<HTMLDivElement>) => {
       onPressEnd(event.clientX, event.clientY);
-      event.preventDefault();
-      event.stopPropagation();
     },
     [onPressEnd]
   );
@@ -100,8 +94,6 @@ function Game() {
       const id = target.dataset.id;
       if (!id) return;
       onPressStart(id, event.touches[0].clientX, event.touches[0].clientY);
-      event.preventDefault();
-      event.stopPropagation();
     },
     [onPressStart]
   );
@@ -109,8 +101,6 @@ function Game() {
   const onTouchMove = useCallback(
     (event: React.TouchEvent<HTMLDivElement>) => {
       onPressMove(event.touches[0].clientX, event.touches[0].clientY);
-      event.preventDefault();
-      event.stopPropagation();
     },
     [onPressMove]
   );
@@ -120,16 +110,9 @@ function Game() {
         event.changedTouches[0].clientX,
         event.changedTouches[0].clientY
       );
-      event.preventDefault();
-      event.stopPropagation();
     },
     [onPressEnd]
   );
-
-  const preventDefault = useCallback((event: any) => {
-    event.preventDefault();
-    event.stopPopagation();
-  }, []);
 
   const onReplay = useCallback(() => {
     const replayId = movesToReplayId(previousMoves);
@@ -147,9 +130,6 @@ function Game() {
     <div className="flex flex-col justify-center w-full h-full text-center">
       <div
         className="relative w-[375px] h-[700px] mx-auto transform-gpu select-none overflow-x-clip"
-        onTouchStartCapture={preventDefault}
-        onTouchEndCapture={preventDefault}
-        onTouchMoveCapture={preventDefault}
         onMouseDown={onMouseDown}
         onMouseMove={onMouseMove}
         onMouseUp={onMouseUp}
