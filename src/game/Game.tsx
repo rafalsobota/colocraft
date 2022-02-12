@@ -4,6 +4,7 @@ import { positionDeltaToDirection, useEngine } from "./Engine";
 import Summary from "./Summary";
 import { CellView } from "./CellView";
 import { movesToReplayId } from "./encoding";
+import { formatDate } from "./random";
 
 function Game() {
   const {
@@ -16,7 +17,7 @@ function Game() {
     finished,
     restart,
     previousMoves,
-  } = useEngine();
+  } = useEngine({ interval: 100 });
 
   const [touchState, setTouchState] = useState<{
     id: string;
@@ -132,13 +133,20 @@ function Game() {
 
   const onReplay = useCallback(() => {
     const replayId = movesToReplayId(previousMoves);
-    window.location.pathname = `/replay/${replayId}`;
+    window.location.pathname = `/replay/${formatDate(new Date())}/${replayId}`;
+  }, [previousMoves]);
+
+  const onCopyReplayLink = useCallback(() => {
+    const replayId = movesToReplayId(previousMoves);
+    navigator.clipboard.writeText(
+      `${window.location.href}/replay/${formatDate(new Date())}/${replayId}`
+    );
   }, [previousMoves]);
 
   return (
     <div className="flex flex-col justify-center w-full h-full text-center">
       <div
-        className="relative w-[375px] h-[700px] mx-auto transform-gpu select-none"
+        className="relative w-[375px] h-[700px] mx-auto transform-gpu select-none overflow-x-clip"
         onTouchStartCapture={preventDefault}
         onTouchEndCapture={preventDefault}
         onTouchMoveCapture={preventDefault}
@@ -151,9 +159,10 @@ function Game() {
       >
         <Summary
           isOpen={finished}
-          onRestart={restart}
+          onPlay={restart}
           score={score}
-          onReplay={onReplay}
+          onWatchReplay={onReplay}
+          onCopyReplayLink={onCopyReplayLink}
         />
         <div className="absolute top-[600px] left-0 p-1 w-full flex flex-row text-slate-500 dark:text-slate-400 antialiased items-center">
           <StarIcon className="h-5 mx-1 text-green-500" />
@@ -168,7 +177,7 @@ function Game() {
           </div>
         </div>
 
-        <div className="absolute top-[650px] left-0 p-1 w-full flex flex-row text-slate-500 dark:text-slate-400 antialiased items-center">
+        {/* <div className="absolute top-[650px] left-0 p-1 w-full flex flex-row text-slate-500 dark:text-slate-400 antialiased items-center">
           <ul>
             {[...previousMoves].map((move, i) => (
               <li key={i}>
@@ -179,7 +188,7 @@ function Game() {
               </li>
             ))}
           </ul>
-        </div>
+        </div> */}
 
         {cells.map(({ cell, x, y }) => {
           return (
@@ -189,6 +198,7 @@ function Game() {
               x={x}
               y={y}
               isInteractive={isInteractive}
+              transitionDuration={300}
             />
           );
         })}

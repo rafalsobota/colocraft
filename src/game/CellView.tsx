@@ -21,11 +21,13 @@ export function CellView({
   x,
   y,
   isInteractive,
+  transitionDuration,
 }: {
   cell: Cell;
   x: number;
   y: number;
   isInteractive?: boolean;
+  transitionDuration: number;
 }) {
   const cursorClass = isInteractive ? "cursor-grab active:cursor-grabbing" : "";
 
@@ -35,12 +37,13 @@ export function CellView({
         data-id={cell.id}
         className={`absolute ${bgColor(
           cell.color
-        )} rounded-xl w-[70px] h-[70px] transition-all ease-spring duration-300 ${
+        )} rounded-xl w-[70px] h-[70px] transition-all ease-spring ${
           isFacebookApp() ? "" : "opacity-0"
         }`}
         style={{
           top: -75 + 2,
           left: x * 75 + 2,
+          transitionDuration: transitionDuration + "ms",
         }}
       ></div>
     );
@@ -50,10 +53,11 @@ export function CellView({
         data-id={cell.id}
         className={`absolute ${bgColor(
           cell.color
-        )} rounded-xl w-[70px] h-[70px] ${cursorClass} opacity-1 scale-100 transition-all ease-spring duration-300`}
+        )} rounded-xl w-[70px] h-[70px] ${cursorClass} opacity-1 scale-100 transition-all ease-spring`}
         style={{
           top: y * 75 + 2,
           left: x * 75 + 2,
+          transitionDuration: transitionDuration + "ms",
         }}
       ></div>
     );
@@ -63,10 +67,11 @@ export function CellView({
         data-id={cell.id}
         className={`absolute ${bgColor(
           cell.color
-        )} rounded-xl w-[70px] h-[70px] opacity-0 scale-0 transition-all ease-spring duration-300`}
+        )} rounded-xl w-[70px] h-[70px] opacity-0 scale-0 transition-all ease-spring`}
         style={{
           top: y * 75 + 2,
           left: x * 75 + 2,
+          transitionDuration: transitionDuration + "ms",
         }}
       ></div>
     );
@@ -78,10 +83,11 @@ export function CellView({
           cell.direction === FusionDirection.Horizontal
             ? "w-[90px] h-[0px] ml-[-10px] mt-[35px]"
             : "w-[0px] h-[90px] ml-[35px] mt-[-10px]"
-        } opacity-1 scale-100 transition-all ease-spring duration-300`}
+        } opacity-1 scale-100 transition-all ease-spring`}
         style={{
           top: y * 75 + 2,
           left: x * 75 + 2,
+          transitionDuration: transitionDuration + "ms",
         }}
       ></div>
     );
@@ -91,10 +97,11 @@ export function CellView({
         data-id={cell.id}
         className={`absolute ${bgColor(
           cell.color
-        )} bg-transparent text-4xl font-bold rounded-xl w-[70px] h-[70px] scale-1 transition-all ease-spring duration-300`}
+        )} bg-transparent text-4xl font-bold rounded-xl w-[70px] h-[70px] scale-1 transition-all ease-spring`}
         style={{
           top: y * 75 + 2,
           left: x * 75 + 2,
+          transitionDuration: transitionDuration + "ms",
         }}
       >
         {cell.score}
@@ -106,10 +113,11 @@ export function CellView({
         data-id={cell.id}
         className={`absolute ${bgColor(
           cell.color
-        )} bg-transparent text-8xl font-bold rounded-xl w-[70px] h-[70px] opacity-0 transition-all ease-spring duration-300`}
+        )} bg-transparent text-8xl font-bold rounded-xl w-[70px] h-[70px] opacity-0 transition-all ease-spring`}
         style={{
           top: y * 75 + 2,
           left: x * 75 + 2,
+          transitionDuration: transitionDuration + "ms",
         }}
       >
         {cell.score}
@@ -121,10 +129,11 @@ export function CellView({
         data-id={cell.id}
         className={`absolute ${bgColor(
           cell.color
-        )} rounded-full w-[70px] h-[70px] ${cursorClass} transition-all ease-spring duration-300`}
+        )} rounded-full w-[70px] h-[70px] ${cursorClass} transition-all ease-spring`}
         style={{
           top: y * 75 + 2,
           left: x * 75 + 2,
+          transitionDuration: transitionDuration + "ms",
         }}
       ></div>
     );
@@ -134,7 +143,7 @@ export function CellView({
         data-id={cell.id}
         className={`absolute ${bgColor(
           cell.color
-        )} rounded-full w-[70px] h-[70px] opacity-1 transition-all ease-spring duration-300 scale-50 animate-pulse`}
+        )} rounded-full w-[70px] h-[70px] opacity-1 transition-all ease-spring scale-50 animate-pulse`}
         style={{
           top: y * 75 + 2,
           left: x * 75 + 2,
@@ -147,10 +156,11 @@ export function CellView({
         data-id={cell.id}
         className={`absolute ${bgColor(
           cell.color
-        )} rounded-sm w-[70px] h-[70px] opacity-1 transition-all ease-spring duration-300 opacity-0 scale-[3]`}
+        )} rounded-sm w-[70px] h-[70px] opacity-1 transition-all ease-spring opacity-0 scale-[3]`}
         style={{
           top: y * 75 + 2,
           left: x * 75 + 2,
+          transitionDuration: transitionDuration + "ms",
         }}
       ></div>
     );

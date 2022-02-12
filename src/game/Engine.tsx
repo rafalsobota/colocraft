@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { formatDate, makeRandomGenerator } from "./crypto";
+import { formatDate, makeRandomGenerator } from "./random";
 
 export enum Color {
   Blue,
@@ -406,7 +406,12 @@ function cellsWithPosition(matrix: Matrix): CellWithPosition[] {
 
 export type Move = { x: number; y: number; direction?: Direction };
 
-export function useEngine(): {
+type EngineOptions = {
+  interval: number;
+  dateString?: string;
+};
+
+export function useEngine(options: EngineOptions): {
   cells: CellWithPosition[];
   onCellSwipe(id: string, direction: Direction): void;
   onCellClick(id: string): void;
@@ -419,7 +424,7 @@ export function useEngine(): {
 } {
   const [iteration, setIteration] = useState(1);
 
-  const today = formatDate(new Date());
+  const today = options.dateString || formatDate(new Date());
 
   const random = useMemo(() => {
     return makeRandomGenerator(today);
@@ -474,11 +479,11 @@ export function useEngine(): {
           setFinished(true);
         }, 1000);
       }
-    }, 100);
+    }, options.interval);
     return () => {
       clearInterval(interval);
     };
-  }, [dirty, movesLeft, setMatrix, addScore, random]);
+  }, [dirty, movesLeft, setMatrix, addScore, random, options.interval]);
 
   const onCellSwipe = useCallback(
     (id: string, direction: Direction) => {

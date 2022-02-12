@@ -1,19 +1,22 @@
 import { Dialog, Transition } from "@headlessui/react";
 import { LightningBoltIcon, StarIcon } from "@heroicons/react/solid";
 import { Fragment, useEffect, useRef } from "react";
+import ReplayMenu from "./ReplayMenu";
 
 type SummaryProps = {
   isOpen: boolean;
   score: number;
-  onRestart: () => void;
-  onReplay: () => void;
+  onPlay: () => void;
+  onWatchReplay: () => void;
+  onCopyReplayLink: () => void;
 };
 
 export default function Summary({
   isOpen,
   score,
-  onRestart,
-  onReplay,
+  onPlay,
+  onWatchReplay,
+  onCopyReplayLink,
 }: SummaryProps) {
   const scoreRef = useRef(score);
   useEffect(() => {
@@ -58,7 +61,7 @@ export default function Summary({
             leaveFrom="opacity-100 scale-100"
             leaveTo="opacity-0 scale-95"
           >
-            <div className="inline-block w-full max-w-md p-6 my-8 overflow-hidden text-left align-middle transition-all transform bg-white shadow-xl dark:bg-slate-700 rounded-2xl">
+            <div className="inline-block w-full max-w-md p-4 my-8 text-left align-middle transition-all transform bg-white shadow-xl overflow-show dark:bg-slate-700 rounded-2xl">
               <Dialog.Title
                 as="h3"
                 className="flex items-center text-lg font-medium leading-6 text-gray-900"
@@ -82,23 +85,18 @@ export default function Summary({
                   </span>
                 </span>
               </div>
-
-              <div className="mt-4 space-x-4 text-right">
+              <div className="mt-4 space-x-2 text-right">
+                <ReplayMenu
+                  onWatchReplay={onWatchReplay}
+                  onCopyReplayLink={onCopyReplayLink}
+                />
                 <button
                   type="button"
-                  className="inline-flex justify-center px-6 py-4 text-sm font-medium text-white border border-transparent bg-sky-500 rounded-xl active:bg-sky-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-300"
-                  onMouseUp={onReplay}
-                  onTouchEnd={onReplay}
+                  className="inline-flex justify-center px-4 py-2 text-sm font-medium text-white border border-transparent rounded-md bg-sky-500 active:bg-sky-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-300"
+                  onMouseUp={onPlay}
+                  onTouchEnd={onPlay}
                 >
-                  Show Replay
-                </button>
-                <button
-                  type="button"
-                  className="inline-flex justify-center px-6 py-4 text-sm font-medium text-white border border-transparent bg-sky-500 rounded-xl active:bg-sky-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-300"
-                  onMouseUp={onRestart}
-                  onTouchEnd={onRestart}
-                >
-                  Play Again
+                  Play
                 </button>
               </div>
             </div>

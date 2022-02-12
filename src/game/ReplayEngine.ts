@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { Move, useEngine } from "./Engine";
 
-export default function useReplayEngine({ moves }: { moves: Move[] }): ReturnType<typeof useEngine> {
+export default function useReplayEngine({ moves, interval, dateString }: { moves: Move[], interval: number, dateString?: string }): ReturnType<typeof useEngine> & { userPhase: boolean } {
 
   const {
     cells,
@@ -13,7 +13,7 @@ export default function useReplayEngine({ moves }: { moves: Move[] }): ReturnTyp
     previousMoves,
     restart,
     score,
-  } = useEngine();
+  } = useEngine({ interval, dateString });
 
   const [futureMoves, setFutureMoves] = useState<Move[]>(moves);
 
@@ -25,20 +25,17 @@ export default function useReplayEngine({ moves }: { moves: Move[] }): ReturnTyp
   useEffect(() => {
     if (isInteractive && futureMoves.length > 0) {
       const move = futureMoves.shift();
+      setFutureMoves(futureMoves);
       if (!move) return;
       const result = cells.find(({ x, y }) => x === move.x && y === move.y);
       if (!result) return;
-
-      setTimeout(() => {
-        if (move.direction) {
-          onCellSwipe(result.cell.id, move.direction);
-        } else {
-          onCellClick(result.cell.id);
-        }
-        setFutureMoves(futureMoves);
-      }, 1000);
+      if (move.direction) {
+        onCellSwipe(result.cell.id, move.direction);
+      } else {
+        onCellClick(result.cell.id);
+      }
     }
-  }, [isInteractive, futureMoves, cells, onCellClick, onCellSwipe]);
+  }, [isInteractive, futureMoves, cells, onCellClick, onCellSwipe, setFutureMoves]);
 
   return {
     cells,
@@ -50,6 +47,7 @@ export default function useReplayEngine({ moves }: { moves: Move[] }): ReturnTyp
     previousMoves,
     restart: onRestart,
     score,
+    userPhase: isInteractive
   }
 
 }

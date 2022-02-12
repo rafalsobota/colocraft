@@ -1,37 +1,36 @@
 import React, { useCallback } from "react";
 import { useParams } from "react-router-dom";
 import { LightningBoltIcon, StarIcon } from "@heroicons/react/solid";
-import Summary from "./Summary";
 import { CellView } from "./CellView";
 import useReplayEngine from "./ReplayEngine";
 import { replayIdToMoves } from "./encoding";
+import ReplaySummary from "./Summary";
 
 function Replay() {
   const { replay } = useParams();
-  const {
-    cells,
-    score,
-    isInteractive,
-    movesLeft,
-    finished,
-    restart,
-    previousMoves,
-  } = useReplayEngine({
-    moves: replay ? replayIdToMoves(replay) : [],
-  });
+  const { cells, score, isInteractive, movesLeft, finished, restart } =
+    useReplayEngine({
+      moves: replay ? replayIdToMoves(replay) : [],
+      interval: 300,
+    });
 
   const onRestart = useCallback(() => {
     window.location.pathname = "/";
   }, []);
 
+  const onCopyReplayLink = useCallback(() => {
+    navigator.clipboard.writeText(`${window.location.href}`);
+  }, []);
+
   return (
     <div className="flex flex-col justify-center w-full h-full text-center">
-      <div className="relative w-[375px] h-[700px] mx-auto transform-gpu select-none">
-        <Summary
+      <div className="relative w-[375px] h-[700px] mx-auto transform-gpu select-none overflow-x-clip">
+        <ReplaySummary
           isOpen={finished}
-          onReplay={restart}
-          onRestart={onRestart}
+          onWatchReplay={restart}
+          onPlay={onRestart}
           score={score}
+          onCopyReplayLink={onCopyReplayLink}
         />
         <div className="absolute top-[600px] left-0 p-1 w-full flex flex-row text-slate-500 dark:text-slate-400 antialiased items-center">
           <StarIcon className="h-5 mx-1 text-green-500" />
@@ -46,19 +45,6 @@ function Replay() {
           </div>
         </div>
 
-        <div className="absolute top-[650px] left-0 p-1 w-full flex flex-row text-slate-500 dark:text-slate-400 antialiased items-center">
-          <ul>
-            {[...previousMoves].map((move, i) => (
-              <li key={i}>
-                {move.x}:{move.y}{" "}
-                {move.direction
-                  ? ["tap", "up", "down", "left", "right"][move.direction]
-                  : "tap"}
-              </li>
-            ))}
-          </ul>
-        </div>
-
         {cells.map(({ cell, x, y }) => {
           return (
             <CellView
@@ -67,6 +53,7 @@ function Replay() {
               x={x}
               y={y}
               isInteractive={isInteractive}
+              transitionDuration={400}
             />
           );
         })}

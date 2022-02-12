@@ -1,7 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom";
 import "./index.css";
-import App from "./App";
 import * as serviceWorkerRegistration from "./serviceWorkerRegistration";
 import reportWebVitals from "./reportWebVitals";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
@@ -13,9 +12,8 @@ ReactDOM.render(
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Game />} />
-        <Route path="replay/:replay" element={<Replay />} />
+        <Route path="replay/:dateString/:movesId" element={<Replay />} />
       </Routes>
-      <Game />
     </BrowserRouter>
   </React.StrictMode>,
   document.getElementById("root")
