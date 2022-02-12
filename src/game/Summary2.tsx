@@ -1,12 +1,7 @@
 import {
-  CalculatorIcon,
-  ChartBarIcon,
-  ClipboardCopyIcon,
-  CubeIcon,
   CubeTransparentIcon,
   ExternalLinkIcon,
   StarIcon,
-  ViewGridIcon,
 } from "@heroicons/react/solid";
 import { useEffect, useRef } from "react";
 import QRCode from "react-qr-code";
