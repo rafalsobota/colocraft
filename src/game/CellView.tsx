@@ -33,12 +33,16 @@ export function CellView({
 }) {
   const cursorClass = isInteractive ? "cursor-grab active:cursor-grabbing" : "";
   const finishedClasses = finished
-    ? "scale-50 opacity-10"
+    ? "scale-[0.25] opacity-5"
     : "scale-100 ease-spring";
 
   const styles = {
-    top: cell.type === CellType.Spawning ? -75 + 2 : y * 75 + 2,
-    left: finished ? cell.color * 75 + 2 : x * 75 + 2,
+    top: finished
+      ? 202 + cell.color * 24
+      : cell.type === CellType.Spawning
+      ? -75 + 2
+      : y * 75 + 2,
+    left: finished ? 13 : x * 75 + 2, //cell.color * 75 + 2 : x * 75 + 2,
     transitionDuration: transitionDuration + "ms",
   };
 
@@ -48,7 +52,7 @@ export function CellView({
         data-id={cell.id}
         className={`absolute ${bgColor(
           cell.color
-        )} rounded-xl w-[70px] h-[70px] transition-all ease-spring ${
+        )} rounded-xl w-[70px] h-[70px] transition-all ease-spring transform ${
           slowMobileBrowser() ? "" : "opacity-0"
         }`}
         style={styles}
@@ -60,7 +64,7 @@ export function CellView({
         data-id={cell.id}
         className={`absolute ${bgColor(
           cell.color
-        )} rounded-xl w-[70px] h-[70px] ${cursorClass} opacity-1  transition-all ${finishedClasses}`}
+        )} rounded-xl w-[70px] h-[70px] ${cursorClass} opacity-1 transform transition-all ${finishedClasses}`}
         style={styles}
       ></div>
     );
@@ -70,7 +74,7 @@ export function CellView({
         data-id={cell.id}
         className={`absolute ${bgColor(
           cell.color
-        )} rounded-xl w-[70px] h-[70px] opacity-0 scale-0 transition-all ease-spring`}
+        )} rounded-xl w-[70px] h-[70px] opacity-0 scale-0 transition-all transform ease-spring`}
         style={styles}
       ></div>
     );
@@ -78,7 +82,7 @@ export function CellView({
     return (
       <div
         data-id={cell.id}
-        className={`absolute ${bgColor(cell.color)} rounded-xl ${
+        className={`absolute ${bgColor(cell.color)} transform rounded-xl ${
           cell.direction === FusionDirection.Horizontal
             ? "w-[90px] h-[0px] ml-[-10px] mt-[35px]"
             : "w-[0px] h-[90px] ml-[35px] mt-[-10px]"
@@ -92,7 +96,7 @@ export function CellView({
         data-id={cell.id}
         className={`absolute ${bgColor(
           cell.color
-        )} bg-transparent text-4xl font-bold rounded-xl w-[70px] h-[70px] scale-1 transition-all ease-spring`}
+        )} bg-transparent text-4xl font-bold rounded-xl transform w-[70px] h-[70px] scale-1 transition-all ease-spring`}
         style={styles}
       >
         {cell.score}
@@ -104,7 +108,7 @@ export function CellView({
         data-id={cell.id}
         className={`absolute ${bgColor(
           cell.color
-        )} bg-transparent text-8xl font-bold rounded-xl w-[70px] h-[70px] opacity-0 transition-all ease-spring`}
+        )} bg-transparent text-8xl font-bold transform rounded-xl w-[70px] h-[70px] opacity-0 transition-all ease-spring`}
         style={styles}
       >
         {cell.score}
@@ -116,7 +120,7 @@ export function CellView({
         data-id={cell.id}
         className={`absolute ${bgColor(
           cell.color
-        )} rounded-full w-[70px] h-[70px] ${cursorClass} transition-all ease-spring`}
+        )} rounded-full w-[70px] h-[70px] ${cursorClass} transition-all ease-spring transform`}
         style={styles}
       ></div>
     );
@@ -126,7 +130,7 @@ export function CellView({
         data-id={cell.id}
         className={`absolute ${bgColor(
           cell.color
-        )} rounded-full w-[70px] h-[70px] opacity-1 transition-all ease-spring scale-50 animate-pulse`}
+        )} rounded-full w-[70px] h-[70px] opacity-1 transition-all ease-spring scale-50 animate-pulse transform`}
         style={{
           top: y * 75 + 2,
           left: x * 75 + 2,
@@ -139,7 +143,7 @@ export function CellView({
         data-id={cell.id}
         className={`absolute ${bgColor(
           cell.color
-        )} rounded-sm w-[70px] h-[70px] opacity-1 transition-all ease-spring opacity-0 scale-[3]`}
+        )} rounded-sm w-[70px] h-[70px] opacity-1 transition-all ease-spring opacity-0 scale-[3] transform`}
         style={styles}
       ></div>
     );

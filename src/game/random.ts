@@ -25,7 +25,11 @@ export function makeRandomGenerator(seed: string): () => number {
   return mulberry32(seedGenerator());
 }
 
+export function minTwoDigits(n: number) {
+  return (n < 10 ? '0' : '') + n;
+}
+
 export function formatDate(date: Date): string {
-  return `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
+  return `${date.getFullYear()}-${minTwoDigits(date.getMonth() + 1)}-${minTwoDigits(date.getDate())}`;
 }
 

@@ -1,12 +1,12 @@
 import { useCallback, useState } from "react";
 import { LightningBoltIcon, StarIcon } from "@heroicons/react/solid";
 import { positionDeltaToDirection, useEngine } from "./Engine";
-import Summary from "./Summary";
 import { CellView } from "./CellView";
 import { movesToReplayId } from "./encoding";
 import { formatDate } from "./random";
-import { makeReplayMessage, makeReplayPath } from "./Replay";
+import { makeReplayHref, makeReplayMessage, makeReplayPath } from "./Replay";
 import { useNavigate } from "react-router-dom";
+import Summary2 from "./Summary2";
 
 function Game() {
   const {
@@ -19,7 +19,7 @@ function Game() {
     finished,
     restart,
     previousMoves,
-  } = useEngine({ interval: 100 });
+  } = useEngine({ interval: 150 });
 
   const navigate = useNavigate();
 
@@ -143,14 +143,11 @@ function Game() {
         onTouchMove={onTouchMove}
         onTouchEnd={onTouchEnd}
       >
-        <Summary
-          isOpen={finished}
-          onPlay={restart}
-          score={score}
-          onWatchReplay={onReplay}
-          onCopyReplayLink={onCopyReplayLink}
-        />
-        <div className="absolute top-[600px] left-0 p-1 w-full flex flex-row text-slate-500 dark:text-slate-400 antialiased items-center">
+        <div
+          className={`absolute top-[600px] left-0 p-1 w-full flex flex-row text-slate-500 dark:text-slate-400 antialiased items-center transition-all ${
+            finished ? "opacity-0" : ""
+          }`}
+        >
           <StarIcon className="h-5 mx-1 text-green-500" />
           <div className="flex-grow text-left text-slate-800 dark:text-slate-100">
             {score}
@@ -162,6 +159,19 @@ function Game() {
             </span>{" "}
           </div>
         </div>
+
+        <Summary2
+          isOpen={finished}
+          onPlay={restart}
+          score={score}
+          onWatchReplay={onReplay}
+          onCopyReplayLink={onCopyReplayLink}
+          link={makeReplayHref(
+            formatDate(new Date()),
+            movesToReplayId(previousMoves)
+          )}
+          dateString={formatDate(new Date())}
+        />
 
         {cells.map(({ cell, x, y }) => {
           return (

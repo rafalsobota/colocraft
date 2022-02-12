@@ -11,7 +11,7 @@ export enum Color {
 
 export const cols = 5;
 export const rows = 8;
-export const moves = 30;
+export const moves = 20;
 
 function randomColor(random: () => number): Color {
   return Math.round(random() * 4);
@@ -477,7 +477,7 @@ export function useEngine(options: EngineOptions): {
       if (movesLeft < 1 && !newDirty) {
         setTimeout(() => {
           setFinished(true);
-        }, 1000);
+        }, 300);
       }
     }, options.interval);
     return () => {

@@ -1,17 +1,17 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { LightningBoltIcon, PlayIcon, StarIcon } from "@heroicons/react/solid";
 import { CellView } from "./CellView";
 import useReplayEngine from "./ReplayEngine";
 import { replayIdToMoves } from "./encoding";
-import ReplaySummary from "./Summary";
 import { formatDate } from "./random";
+import Summary2 from "./Summary2";
 
 export function makeReplayHref(dateString: string, movesId: string) {
   return `${window.location.protocol}//${window.location.host}${makeReplayPath(
     dateString,
     movesId
-  )}`.replace("//", "/");
+  )}`;
 }
 
 export function makeReplayPath(dateString: string, movesId: string) {
@@ -29,10 +29,13 @@ export function makeReplayMessage(
 
 function Replay() {
   const { movesId, dateString } = useParams();
+
+  const [slowmo, setSlowmo] = useState(false);
+
   const { cells, score, isInteractive, movesLeft, finished, restart } =
     useReplayEngine({
       moves: movesId ? replayIdToMoves(movesId) : [],
-      interval: 300,
+      interval: slowmo ? 300 : 150,
       dateString,
     });
 
@@ -41,6 +44,11 @@ function Replay() {
   const onRestart = useCallback(() => {
     navigate("/");
   }, [navigate]);
+
+  const replayLink = useMemo(() => {
+    if (!movesId) return "";
+    return makeReplayHref(dateString || formatDate(new Date()), movesId);
+  }, [movesId, dateString]);
 
   const onCopyReplayLink = useCallback(() => {
     if (!movesId) return;
@@ -52,17 +60,37 @@ function Replay() {
     navigator.clipboard.writeText(message);
   }, [movesId, score, dateString]);
 
+  const onPressStart = useCallback(() => {
+    setSlowmo(true);
+  }, []);
+
+  const onPressEnd = useCallback(() => {
+    setSlowmo(false);
+  }, []);
+
   return (
     <div className="flex flex-col justify-center w-full h-full text-center">
-      <div className="relative w-[375px] h-[700px] mx-auto transform-gpu select-none">
-        <ReplaySummary
+      <div
+        className="relative w-[375px] h-[700px] mx-auto transform-gpu select-none"
+        onMouseDown={onPressStart}
+        onMouseUp={onPressEnd}
+        onTouchStart={onPressStart}
+        onTouchEnd={onPressEnd}
+      >
+        <Summary2
           isOpen={finished}
           onWatchReplay={restart}
           onPlay={onRestart}
           score={score}
           onCopyReplayLink={onCopyReplayLink}
+          link={replayLink}
+          dateString={dateString || formatDate(new Date())}
         />
-        <div className="absolute top-[600px] left-0 p-1 w-full flex flex-row text-slate-500 dark:text-slate-400 antialiased items-center">
+        <div
+          className={`absolute top-[600px] left-0 p-1 w-full flex flex-row text-slate-500 dark:text-slate-400 antialiased items-center ${
+            finished ? "opacity-0" : ""
+          }`}
+        >
           <StarIcon className="h-5 mx-1 text-green-500" />
           <div className="text-left text-slate-800 dark:text-slate-100">
             {score}
@@ -97,7 +125,7 @@ function Replay() {
               x={x}
               y={y}
               isInteractive={isInteractive}
-              transitionDuration={400}
+              transitionDuration={slowmo ? 600 : 300}
               finished={finished}
             />
           );
