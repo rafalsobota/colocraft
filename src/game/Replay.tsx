@@ -6,6 +6,10 @@ import useReplayEngine from "./ReplayEngine";
 import { replayIdToMoves } from "./encoding";
 import ReplaySummary from "./Summary";
 
+export function makeReplayLink(dateString: string, movesId: string) {
+  return `${window.location.protocol}//${window.location.host}/replay/${dateString}/${movesId}`;
+}
+
 function Replay() {
   const { movesId, dateString } = useParams();
   const { cells, score, isInteractive, movesLeft, finished, restart } =
@@ -25,7 +29,7 @@ function Replay() {
 
   return (
     <div className="flex flex-col justify-center w-full h-full text-center">
-      <div className="relative w-[375px] h-[700px] mx-auto transform-gpu select-none overflow-x-clip">
+      <div className="relative w-[375px] h-[700px] mx-auto transform-gpu select-none overflow-x-hidden">
         <ReplaySummary
           isOpen={finished}
           onWatchReplay={restart}
