@@ -92,7 +92,7 @@ export default function Summary({
                 />
                 <button
                   type="button"
-                  className="inline-flex justify-center px-4 py-2 text-sm font-medium text-white border border-transparent rounded-md bg-sky-500 active:bg-sky-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-300"
+                  className="inline-flex justify-center px-6 py-4 text-sm font-medium text-white border border-transparent rounded-md bg-sky-500 active:bg-sky-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-300"
                   onMouseUp={onPlay}
                   onTouchEnd={onPlay}
                 >

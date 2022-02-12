@@ -29,7 +29,7 @@ function Replay() {
 
   return (
     <div className="flex flex-col justify-center w-full h-full text-center">
-      <div className="relative w-[375px] h-[700px] mx-auto transform-gpu select-none overflow-x-hidden">
+      <div className="relative w-[375px] h-[700px] mx-auto transform-gpu select-none">
         <ReplaySummary
           isOpen={finished}
           onWatchReplay={restart}
