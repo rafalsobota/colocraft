@@ -1,29 +1,9 @@
 import { useCallback, useState } from "react";
 import { LightningBoltIcon, StarIcon } from "@heroicons/react/solid";
-import {
-  CellType,
-  Color,
-  FusionDirection,
-  positionDeltaToDirection,
-  useEngine,
-} from "./Engine";
+import { positionDeltaToDirection, useEngine } from "./Engine";
 import Summary from "./Summary";
-import { isFacebookApp } from "./system";
-
-function bgColor(color: Color): string {
-  switch (color) {
-    case Color.Blue:
-      return "bg-sky-500 active:bg-sky-600 text-sky-600";
-    case Color.Green:
-      return "bg-green-500 active:bg-green-600 text-green-600";
-    case Color.Yellow:
-      return "bg-yellow-500 active:bg-yellow-600 text-yellow-600";
-    case Color.Pink:
-      return "bg-pink-500 active:bg-pink-600 text-pink-600";
-    case Color.Purple:
-      return "bg-purple-500 active:bg-purple-600 text-purple-600";
-  }
-}
+import { CellView } from "./CellView";
+import { movesToReplayId } from "./encoding";
 
 function Game() {
   const {
@@ -35,6 +15,7 @@ function Game() {
     movesLeft,
     finished,
     restart,
+    previousMoves,
   } = useEngine();
 
   const [touchState, setTouchState] = useState<{
@@ -149,177 +130,69 @@ function Game() {
     event.stopPopagation();
   }, []);
 
-  const cursorClass = isInteractive ? "cursor-grab active:cursor-grabbing" : "";
+  const onReplay = useCallback(() => {
+    const replayId = movesToReplayId(previousMoves);
+    window.location.pathname = `/replay/${replayId}`;
+  }, [previousMoves]);
 
   return (
-    <div
-      className="relative w-[375px] h-[700px] mx-auto transform-gpu select-none"
-      onTouchStartCapture={preventDefault}
-      onTouchEndCapture={preventDefault}
-      onTouchMoveCapture={preventDefault}
-      onMouseDown={onMouseDown}
-      onMouseMove={onMouseMove}
-      onMouseUp={onMouseUp}
-      onTouchStart={onTouchStart}
-      onTouchMove={onTouchMove}
-      onTouchEnd={onTouchEnd}
-    >
-      <Summary isOpen={finished} onRestart={restart} score={score} />
-      <div className="absolute top-[600px] left-0 p-1 w-full flex flex-row text-slate-500 dark:text-slate-400 antialiased items-center">
-        <StarIcon className="h-5 mx-1 text-green-500" />
-        <div className="flex-grow text-left text-slate-800 dark:text-slate-100">
-          {score}
+    <div className="flex flex-col justify-center w-full h-full text-center">
+      <div
+        className="relative w-[375px] h-[700px] mx-auto transform-gpu select-none"
+        onTouchStartCapture={preventDefault}
+        onTouchEndCapture={preventDefault}
+        onTouchMoveCapture={preventDefault}
+        onMouseDown={onMouseDown}
+        onMouseMove={onMouseMove}
+        onMouseUp={onMouseUp}
+        onTouchStart={onTouchStart}
+        onTouchMove={onTouchMove}
+        onTouchEnd={onTouchEnd}
+      >
+        <Summary
+          isOpen={finished}
+          onRestart={restart}
+          score={score}
+          onReplay={onReplay}
+        />
+        <div className="absolute top-[600px] left-0 p-1 w-full flex flex-row text-slate-500 dark:text-slate-400 antialiased items-center">
+          <StarIcon className="h-5 mx-1 text-green-500" />
+          <div className="flex-grow text-left text-slate-800 dark:text-slate-100">
+            {score}
+          </div>
+          <LightningBoltIcon className={`h-4 text-yellow-500`} />
+          <div>
+            <span className="mx-1 text-slate-800 dark:text-slate-100">
+              {movesLeft}
+            </span>{" "}
+          </div>
         </div>
-        <LightningBoltIcon className={`h-4 text-yellow-500`} />
-        <div>
-          <span className="mx-1 text-slate-800 dark:text-slate-100">
-            {movesLeft}
-          </span>{" "}
-        </div>
-      </div>
 
-      {cells.map(({ cell, x, y }) => {
-        if (cell.type === CellType.Spawning) {
+        <div className="absolute top-[650px] left-0 p-1 w-full flex flex-row text-slate-500 dark:text-slate-400 antialiased items-center">
+          <ul>
+            {[...previousMoves].map((move, i) => (
+              <li key={i}>
+                {move.x}:{move.y}{" "}
+                {move.direction
+                  ? ["tap", "up", "down", "left", "right"][move.direction]
+                  : "tap"}
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        {cells.map(({ cell, x, y }) => {
           return (
-            <div
+            <CellView
               key={cell.id}
-              data-id={cell.id}
-              className={`absolute ${bgColor(
-                cell.color
-              )} rounded-xl w-[70px] h-[70px] transition-all ease-spring duration-300 ${
-                isFacebookApp() ? "" : "opacity-0"
-              }`}
-              style={{
-                top: -75 + 2,
-                left: x * 75 + 2,
-              }}
-            ></div>
+              cell={cell}
+              x={x}
+              y={y}
+              isInteractive={isInteractive}
+            />
           );
-        } else if (
-          cell.type === CellType.Dropped ||
-          cell.type === CellType.Idle
-        ) {
-          return (
-            <div
-              key={cell.id}
-              data-id={cell.id}
-              className={`absolute ${bgColor(
-                cell.color
-              )} rounded-xl w-[70px] h-[70px] ${cursorClass} opacity-1 scale-100 transition-all ease-spring duration-300`}
-              style={{
-                top: y * 75 + 2,
-                left: x * 75 + 2,
-              }}
-            ></div>
-          );
-        } else if (cell.type === CellType.Clicked) {
-          return (
-            <div
-              key={cell.id}
-              data-id={cell.id}
-              className={`absolute ${bgColor(
-                cell.color
-              )} rounded-xl w-[70px] h-[70px] opacity-0 scale-0 transition-all ease-spring duration-300`}
-              style={{
-                top: y * 75 + 2,
-                left: x * 75 + 2,
-              }}
-            ></div>
-          );
-        } else if (cell.type === CellType.Fusion) {
-          return (
-            <div
-              key={cell.id}
-              data-id={cell.id}
-              className={`absolute ${bgColor(cell.color)} rounded-xl ${
-                cell.direction === FusionDirection.Horizontal
-                  ? "w-[90px] h-[0px] ml-[-10px] mt-[35px]"
-                  : "w-[0px] h-[90px] ml-[35px] mt-[-10px]"
-              } opacity-1 scale-100 transition-all ease-spring duration-300`}
-              style={{
-                top: y * 75 + 2,
-                left: x * 75 + 2,
-              }}
-            ></div>
-          );
-        } else if (cell.type === CellType.ScoreEnter) {
-          return (
-            <div
-              key={cell.id}
-              data-id={cell.id}
-              className={`absolute ${bgColor(
-                cell.color
-              )} bg-transparent text-4xl font-bold rounded-xl w-[70px] h-[70px] scale-1 transition-all ease-spring duration-300`}
-              style={{
-                top: y * 75 + 2,
-                left: x * 75 + 2,
-              }}
-            >
-              {cell.score}
-            </div>
-          );
-        } else if (cell.type === CellType.ScoreExit) {
-          return (
-            <div
-              key={cell.id}
-              data-id={cell.id}
-              className={`absolute ${bgColor(
-                cell.color
-              )} bg-transparent text-8xl font-bold rounded-xl w-[70px] h-[70px] opacity-0 transition-all ease-spring duration-300`}
-              style={{
-                top: y * 75 + 2,
-                left: x * 75 + 2,
-              }}
-            >
-              {cell.score}
-            </div>
-          );
-        } else if (cell.type === CellType.Bomb) {
-          return (
-            <div
-              key={cell.id}
-              data-id={cell.id}
-              className={`absolute ${bgColor(
-                cell.color
-              )} rounded-full w-[70px] h-[70px] ${cursorClass} transition-all ease-spring duration-300`}
-              style={{
-                top: y * 75 + 2,
-                left: x * 75 + 2,
-              }}
-            ></div>
-          );
-        } else if (cell.type === CellType.BombIgnited) {
-          return (
-            <div
-              key={cell.id}
-              data-id={cell.id}
-              className={`absolute ${bgColor(
-                cell.color
-              )} rounded-full w-[70px] h-[70px] opacity-1 transition-all ease-spring duration-300 scale-50 animate-pulse`}
-              style={{
-                top: y * 75 + 2,
-                left: x * 75 + 2,
-              }}
-            ></div>
-          );
-        } else if (cell.type === CellType.BombDetonated) {
-          return (
-            <div
-              key={cell.id}
-              data-id={cell.id}
-              className={`absolute ${bgColor(
-                cell.color
-              )} rounded-sm w-[70px] h-[70px] opacity-1 transition-all ease-spring duration-300 opacity-0 scale-[3]`}
-              style={{
-                top: y * 75 + 2,
-                left: x * 75 + 2,
-              }}
-            ></div>
-          );
-        } else {
-          return <></>;
-        }
-      })}
+        })}
+      </div>
     </div>
   );
 }

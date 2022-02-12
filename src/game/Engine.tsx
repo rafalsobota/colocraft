@@ -138,7 +138,7 @@ function detonateBomb(matrix: Matrix, x: number, y: number): Matrix {
   });
 }
 
-function clickCell(matrix: Matrix, id: string): Matrix {
+function clickCell(matrix: Matrix, id: string, previousMoves: Move[]): Matrix {
   const target = findCellById(matrix, id);
   if (!target) {
     return matrix;
@@ -147,6 +147,7 @@ function clickCell(matrix: Matrix, id: string): Matrix {
   const { cell, x, y } = target;
 
   if (cell.type === CellType.Idle) {
+    previousMoves.push({ x, y });
     matrix[x][y] = {
       ...cell,
       type: CellType.Clicked,
@@ -157,11 +158,11 @@ function clickCell(matrix: Matrix, id: string): Matrix {
   }
 }
 
-enum Direction {
-  Up,
-  Down,
-  Left,
-  Right,
+export enum Direction {
+  Up = 1,
+  Down = 2,
+  Left = 3,
+  Right = 4,
 }
 
 export function positionDeltaToDirection(dx: number, dy: number): Direction {
@@ -174,27 +175,36 @@ export function positionDeltaToDirection(dx: number, dy: number): Direction {
     : Direction.Up;
 }
 
-function swipeCell(matrix: Matrix, id: string, direction: Direction): Matrix {
+function swipeCell(
+  matrix: Matrix,
+  id: string,
+  direction: Direction,
+  previousMoves: Move[]
+): Matrix {
   const target = findCellById(matrix, id);
   if (!target) return matrix;
   const { cell, x, y } = target;
   if (direction === Direction.Up) {
     if (y === 0) return matrix;
+    previousMoves.push({ x, y, direction });
     matrix[x][y] = matrix[x][y - 1];
     matrix[x][y - 1] = cell;
     return [...matrix];
   } else if (direction === Direction.Down) {
     if (y === rows - 1) return matrix;
+    previousMoves.push({ x, y, direction });
     matrix[x][y] = matrix[x][y + 1];
     matrix[x][y + 1] = cell;
     return [...matrix];
   } else if (direction === Direction.Left) {
     if (x === 0) return matrix;
+    previousMoves.push({ x, y, direction });
     matrix[x][y] = matrix[x - 1][y];
     matrix[x - 1][y] = cell;
     return [...matrix];
   } else if (direction === Direction.Right) {
     if (x === cols - 1) return matrix;
+    previousMoves.push({ x, y, direction });
     matrix[x][y] = matrix[x + 1][y];
     matrix[x + 1][y] = cell;
     return [...matrix];
@@ -394,6 +404,8 @@ function cellsWithPosition(matrix: Matrix): CellWithPosition[] {
   return acc.sort((a, b) => (a.cell.id < b.cell.id ? -1 : 1));
 }
 
+export type Move = { x: number; y: number; direction?: Direction };
+
 export function useEngine(): {
   cells: CellWithPosition[];
   onCellSwipe(id: string, direction: Direction): void;
@@ -403,6 +415,7 @@ export function useEngine(): {
   isInteractive: boolean;
   restart: () => void;
   finished: boolean;
+  previousMoves: Move[];
 } {
   const [iteration, setIteration] = useState(1);
 
@@ -419,12 +432,16 @@ export function useEngine(): {
   const matrixRef = useRef<Matrix>(matrix);
   const scoreRef = useRef<number>(0);
   const [movesLeft, setMovesLeft] = useState(moves);
+  const [finished, setFinished] = useState(false);
+  const previousMoves = useRef<Move[]>([]);
 
   useEffect(() => {
     setMatrix(createMatrix(random));
     setDirty(true);
     scoreRef.current = 0;
     setMovesLeft(moves);
+    setFinished(false);
+    previousMoves.current = [];
   }, [setMatrix, setDirty, setMovesLeft, random]);
 
   const restart = useCallback(() => {
@@ -452,6 +469,11 @@ export function useEngine(): {
       setMatrix(newMatrix);
       const newDirty = isDirty(newMatrix);
       setDirty(newDirty);
+      if (movesLeft < 1 && !newDirty) {
+        setTimeout(() => {
+          setFinished(true);
+        }, 1000);
+      }
     }, 100);
     return () => {
       clearInterval(interval);
@@ -461,7 +483,9 @@ export function useEngine(): {
   const onCellSwipe = useCallback(
     (id: string, direction: Direction) => {
       if (dirty || movesLeft < 1) return;
-      setMatrix(swipeCell(matrixRef.current, id, direction));
+      setMatrix(
+        swipeCell(matrixRef.current, id, direction, previousMoves.current)
+      );
       setDirty(true);
       setMovesLeft(movesLeft - 1);
     },
@@ -471,7 +495,7 @@ export function useEngine(): {
   const onCellClick = useCallback(
     (id: string) => {
       if (dirty || movesLeft < 1) return;
-      setMatrix(clickCell(matrixRef.current, id));
+      setMatrix(clickCell(matrixRef.current, id, previousMoves.current));
       setDirty(true);
       setMovesLeft(movesLeft - 1);
     },
@@ -484,8 +508,9 @@ export function useEngine(): {
     onCellClick,
     score: scoreRef.current,
     movesLeft,
-    isInteractive: !dirty,
+    isInteractive: !dirty && movesLeft > 0,
     restart,
-    finished: movesLeft < 1 && !dirty,
+    finished,
+    previousMoves: previousMoves.current,
   };
 }

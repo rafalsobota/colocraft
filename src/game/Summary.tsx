@@ -6,9 +6,15 @@ type SummaryProps = {
   isOpen: boolean;
   score: number;
   onRestart: () => void;
+  onReplay: () => void;
 };
 
-export default function Summary({ isOpen, score, onRestart }: SummaryProps) {
+export default function Summary({
+  isOpen,
+  score,
+  onRestart,
+  onReplay,
+}: SummaryProps) {
   const scoreRef = useRef(score);
   useEffect(() => {
     if (score > 0) {
@@ -77,10 +83,18 @@ export default function Summary({ isOpen, score, onRestart }: SummaryProps) {
                 </span>
               </div>
 
-              <div className="mt-4 text-right">
+              <div className="mt-4 space-x-4 text-right">
                 <button
                   type="button"
-                  className="inline-flex justify-center px-6 py-4 text-sm font-medium text-white border border-transparent bg-sky-500 rounded-xl active:bg-sky-600 focus:outline-none focus-visible:ring-4 focus-visible:ring-sky-300"
+                  className="inline-flex justify-center px-6 py-4 text-sm font-medium text-white border border-transparent bg-sky-500 rounded-xl active:bg-sky-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-300"
+                  onMouseUp={onReplay}
+                  onTouchEnd={onReplay}
+                >
+                  Show Replay
+                </button>
+                <button
+                  type="button"
+                  className="inline-flex justify-center px-6 py-4 text-sm font-medium text-white border border-transparent bg-sky-500 rounded-xl active:bg-sky-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-300"
                   onMouseUp={onRestart}
                   onTouchEnd={onRestart}
                 >
