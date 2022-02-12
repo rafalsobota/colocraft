@@ -35,8 +35,11 @@ function Replay() {
         />
         <div className="absolute top-[600px] left-0 p-1 w-full flex flex-row text-slate-500 dark:text-slate-400 antialiased items-center">
           <StarIcon className="h-5 mx-1 text-green-500" />
-          <div className="flex-grow text-left text-slate-800 dark:text-slate-100">
+          <div className="text-left text-slate-800 dark:text-slate-100">
             {score}
+          </div>
+          <div className="flex-grow font-semibold text-red-500 animate-pulse">
+            Replay
           </div>
           <LightningBoltIcon className={`h-4 text-yellow-500`} />
           <div>
