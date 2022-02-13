@@ -5,6 +5,8 @@ import {
 } from "@heroicons/react/solid";
 import { useEffect, useRef } from "react";
 import QRCode from "react-qr-code";
+import { bgColor } from "./color";
+import { Graveyard, graveyardStats, mapGraveyard } from "./graveyard";
 
 type SummaryProps = {
   isOpen: boolean;
@@ -14,6 +16,7 @@ type SummaryProps = {
   onCopyReplayLink: () => void;
   link: string;
   dateString: string;
+  graveyard: Graveyard;
 };
 
 function classNames(...args: string[]) {
@@ -28,6 +31,7 @@ export default function Summary2({
   onWatchReplay,
   onCopyReplayLink,
   dateString,
+  graveyard,
 }: SummaryProps) {
   const scoreRef = useRef(score);
   useEffect(() => {
@@ -39,11 +43,11 @@ export default function Summary2({
   return (
     <div
       className={classNames(
-        isOpen ? "" : `opacity-0`,
-        `transition-all ease-in-out transform w-full text-slate-700 dark:text-slate-400`
+        isOpen ? "block" : `opacity-0 hidden`,
+        `transition-all ease-in-out transform w-full text-slate-700 dark:text-slate-400 absolute z-10 h-[630px]`
       )}
     >
-      <div className="p-2 text-left text-sky-200 dark:text-sky-500 w-[110px] absolute top-[445px] left-[45px] text-xs">
+      <div className="p-2 text-left text-sky-200 dark:text-sky-500 w-[110px] absolute top-[452px] left-[30px] text-xs">
         {dateString}
       </div>
 
@@ -55,117 +59,50 @@ export default function Summary2({
         {dateString}
       </div> */}
 
-      <div className="flex flex-col items-center justify-center pt-[80px]">
-        <div className="text-6xl font-semibold opacity-90 text-slate-800 dark:text-slate-100">
-          {scoreRef.current}
-        </div>
+      <div className="flex flex-col items-center justify-center mt-[360px] z-20 absolute left-0 right-0 py-3">
         <div className="flex flex-row items-center">
+          {/* <StarIcon className="h-16 mt-1 mr-1 text-green-500 " /> */}
+          <div className="text-6xl font-semibold text-black bg-white bg-opacity-50 dark:bg-opacity-50 dark:bg-slate-900 dark:text-white backdrop-blur-sm">
+            {scoreRef.current}
+          </div>
+        </div>
+        {/* 
+        <div className="flex flex-row items-center px-2 bg-white rounded-md bg-opacity-70 dark:bg-slate-900 backdrop-blur-sm">
           <div>
             <StarIcon className="h-5 mr-2 text-green-500" />
           </div>
-          <div className="text-green-500">Score</div>
-        </div>
+          <div className="text-black dark:text-white">Score</div>
+        </div> */}
       </div>
 
-      <div className="flex flex-row p-2 pt-[60px] opacity-90">
-        <div className="pl-8">
-          <div className="flex flex-row items-center">
-            <div className="w-4 h-4 rounded-sm bg-sky-500"></div>
-            <div className="pl-2">x 10</div>
-          </div>
-          <div className="flex flex-row items-center">
-            <div className="w-4 h-4 bg-green-500 rounded-sm"></div>
-            <div className="pl-2">x 18</div>
-          </div>
-          <div className="flex flex-row items-center">
-            <div className="w-4 h-4 bg-yellow-500 rounded-sm"></div>
-            <div className="pl-2">x 35</div>
-          </div>
-          <div className="flex flex-row items-center">
-            <div className="w-4 h-4 bg-pink-500 rounded-sm"></div>
-            <div className="pl-2">x 15</div>
-          </div>
-          <div className="flex flex-row items-center">
-            <div className="w-4 h-4 bg-purple-500 rounded-sm"></div>
-            <div className="pl-2">x 2</div>
-          </div>
-        </div>
-        <div className="pl-8">
-          <div className="flex flex-row items-center">
-            <div className="w-4 h-4 rounded-full bg-sky-500"></div>
-            <div className="pl-2">x 10</div>
-          </div>
-          <div className="flex flex-row items-center">
-            <div className="w-4 h-4 bg-green-500 rounded-full"></div>
-            <div className="pl-2">x 18</div>
-          </div>
-          <div className="flex flex-row items-center">
-            <div className="w-4 h-4 bg-yellow-500 rounded-full"></div>
-            <div className="pl-2">x 35</div>
-          </div>
-          <div className="flex flex-row items-center opacity-30">
-            <div className="w-4 h-4 bg-pink-500 rounded-full"></div>
-            <div className="pl-2">&nbsp;</div>
-          </div>
-          <div className="flex flex-row items-center">
-            <div className="w-4 h-4 bg-purple-500 rounded-full"></div>
-            <div className="pl-2">x 2</div>
+      {isOpen ? (
+        <div className="px-4 absolute bottom-[260px] w-full opacity-100">
+          <div
+            className="flex flex-row justify-center origin-bottom"
+            // style={{
+            //   transform: "perspective(1000px) rotateX(45deg)",
+            // }}
+          >
+            {graveyardStats(graveyard).map(({ type, color, count }) => {
+              return count < 1 ? null : (
+                <div className="flex flex-col-reverse">
+                  {Array(count).fill(
+                    <div
+                      className={`${
+                        type === "bomb" ? "rounded-full" : ""
+                      } ${bgColor(color)} ${"w-2 h-2 m-1"}`}
+                    ></div>
+                  )}
+                </div>
+              );
+            })}
           </div>
         </div>
-        <div className="pl-8">
-          <div className="flex flex-row items-center opacity-30">
-            <div className="w-4 h-4 border-2 rounded-sm border-sky-500"></div>
-            <div className="pl-2">&nbsp;</div>
-          </div>
-          <div className="flex flex-row items-center opacity-30">
-            <div className="w-4 h-4 border-2 border-green-500 rounded-sm"></div>
-            <div className="pl-2">&nbsp;</div>
-          </div>
-          <div className="flex flex-row items-center opacity-30">
-            <div className="w-4 h-4 border-2 border-yellow-500 rounded-sm"></div>
-            <div className="pl-2">&nbsp;</div>
-          </div>
-          <div className="flex flex-row items-center opacity-30">
-            <div className="w-4 h-4 border-2 border-pink-500 rounded-sm"></div>
-            <div className="pl-2">&nbsp;</div>
-          </div>
-          <div className="flex flex-row items-center opacity-30">
-            <div className="w-4 h-4 border-2 border-purple-500 rounded-sm"></div>
-            <div className="pl-2">&nbsp;</div>
-          </div>
-        </div>
-        <div className="pl-8">
-          <div className="flex flex-row items-center opacity-30">
-            <div className="w-3 h-3 rotate-45 rounded-sm bg-sky-500"></div>
-            <div className="pl-2">&nbsp;</div>
-          </div>
-          <div className="flex flex-row items-center opacity-30">
-            <div className="w-3 h-3 rotate-45 bg-green-500 rounded-sm"></div>
-            <div className="pl-2">&nbsp;</div>
-          </div>
-          <div className="flex flex-row items-center opacity-30">
-            <div className="w-3 h-3 rotate-45 bg-yellow-500 rounded-sm"></div>
-            <div className="pl-2">&nbsp;</div>
-          </div>
-          <div className="flex flex-row items-center opacity-30">
-            <div className="w-3 h-3 rotate-45 bg-pink-500 rounded-sm"></div>
-            <div className="pl-2">&nbsp;</div>
-          </div>
-          <div className="flex flex-row items-center opacity-30">
-            <div className="w-3 h-3 rotate-45 bg-purple-500 rounded-sm"></div>
-            <div className="pl-2">&nbsp;</div>
-          </div>
-        </div>
-      </div>
-      <div className="flex flex-row items-center justify-center text-green-500">
-        <CubeTransparentIcon className="h-4 mr-2" />
-        <div>Collected Items</div>
-      </div>
+      ) : null}
 
-      <div className="flex flex-row px-4 mt-[80px]">
-        <a href={link} target="_blank" rel="noopener noreferrer">
-          <div className="p-4">
-            {/* <a href={link} target="_blank" rel="noopener noreferrer"> */}
+      <div className="flex flex-row p-4 space-x-4 mt-[290px] absolute bottom-0 w-full">
+        <a href={link} target="_blank" rel="noreferrer">
+          <div className="">
             <QRCode
               bgColor="#0f172a"
               // fgColor="#ec4899"
@@ -181,9 +118,9 @@ export default function Summary2({
             </div>
           </div>
         </a>
-        <div className="flex flex-col p-4 space-y-4">
+        <div className="flex flex-col flex-grow space-y-4">
           <button
-            className="px-8 py-4 border rounded-xl border-sky-500 text-sky-500"
+            className="px-8 py-4 border rounded-xl border-sky-500 text-sky-500 backdrop-blur-md"
             onClick={onWatchReplay}
           >
             Watch Replay

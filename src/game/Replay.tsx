@@ -32,12 +32,19 @@ function Replay() {
 
   const [slowmo, setSlowmo] = useState(false);
 
-  const { cells, score, isInteractive, movesLeft, finished, restart } =
-    useReplayEngine({
-      moves: movesId ? replayIdToMoves(movesId) : [],
-      interval: slowmo ? 300 : 150,
-      dateString,
-    });
+  const {
+    cells,
+    score,
+    isInteractive,
+    movesLeft,
+    finished,
+    restart,
+    graveyard,
+  } = useReplayEngine({
+    moves: movesId ? replayIdToMoves(movesId) : [],
+    interval: slowmo ? 300 : 150,
+    dateString,
+  });
 
   const navigate = useNavigate();
 
@@ -85,6 +92,7 @@ function Replay() {
           onCopyReplayLink={onCopyReplayLink}
           link={replayLink}
           dateString={dateString || formatDate(new Date())}
+          graveyard={graveyard}
         />
         <div
           className={`absolute top-[600px] left-0 p-1 w-full flex flex-row text-slate-500 dark:text-slate-400 antialiased items-center ${

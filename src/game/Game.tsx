@@ -19,6 +19,7 @@ function Game() {
     finished,
     restart,
     previousMoves,
+    graveyard,
   } = useEngine({ interval: 150 });
 
   const navigate = useNavigate();
@@ -171,6 +172,7 @@ function Game() {
             movesToReplayId(previousMoves)
           )}
           dateString={formatDate(new Date())}
+          graveyard={graveyard}
         />
 
         {cells.map(({ cell, x, y }) => {

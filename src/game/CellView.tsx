@@ -1,20 +1,6 @@
-import { Cell, CellType, Color, FusionDirection } from "./Engine";
+import { bgColor } from "./color";
+import { Cell, CellType, FusionDirection } from "./Engine";
 import { slowMobileBrowser } from "./system";
-
-function bgColor(color: Color): string {
-  switch (color) {
-    case Color.Blue:
-      return "bg-sky-500 active:bg-sky-600 text-sky-600";
-    case Color.Green:
-      return "bg-green-500 active:bg-green-600 text-green-600";
-    case Color.Yellow:
-      return "bg-yellow-500 active:bg-yellow-600 text-yellow-600";
-    case Color.Pink:
-      return "bg-pink-500 active:bg-pink-600 text-pink-600";
-    case Color.Purple:
-      return "bg-purple-500 active:bg-purple-600 text-purple-600";
-  }
-}
 
 export function CellView({
   cell,
@@ -33,16 +19,12 @@ export function CellView({
 }) {
   const cursorClass = isInteractive ? "cursor-grab active:cursor-grabbing" : "";
   const finishedClasses = finished
-    ? "scale-[0.25] opacity-5"
+    ? "scale-50 opacity-5 blur-md"
     : "scale-100 ease-spring";
 
   const styles = {
-    top: finished
-      ? 202 + cell.color * 24
-      : cell.type === CellType.Spawning
-      ? -75 + 2
-      : y * 75 + 2,
-    left: finished ? 13 : x * 75 + 2, //cell.color * 75 + 2 : x * 75 + 2,
+    top: cell.type === CellType.Spawning ? -75 + 2 : y * 75 + 2,
+    left: finished ? cell.color * 75 + 2 : x * 75 + 2,
     transitionDuration: transitionDuration + "ms",
   };
 

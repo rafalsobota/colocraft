@@ -13,6 +13,7 @@ export default function useReplayEngine({ moves, interval, dateString }: { moves
     previousMoves,
     restart,
     score,
+    graveyard,
   } = useEngine({ interval, dateString });
 
   const [futureMoves, setFutureMoves] = useState<Move[]>(moves);
@@ -47,7 +48,8 @@ export default function useReplayEngine({ moves, interval, dateString }: { moves
     previousMoves,
     restart: onRestart,
     score,
-    userPhase: isInteractive
+    userPhase: isInteractive,
+    graveyard,
   }
 
 }

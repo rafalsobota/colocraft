@@ -1,21 +1,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Color, randomColor } from "./color";
+import { createGraveyard, Graveyard } from "./graveyard";
 import { formatDate, makeRandomGenerator } from "./random";
-
-export enum Color {
-  Blue,
-  Green,
-  Yellow,
-  Pink,
-  Purple,
-}
 
 export const cols = 5;
 export const rows = 8;
-export const moves = 20;
-
-function randomColor(random: () => number): Color {
-  return Math.round(random() * 4);
-}
+export const moves = 3;
 
 export enum CellType {
   Spawning,
@@ -88,7 +78,7 @@ function isWaitForDetonation(matrix: Matrix): boolean {
   return !!busy;
 }
 
-function detonateBombs(matrix: Matrix): Matrix {
+function detonateBombs(matrix: Matrix, graveyard: Graveyard): Matrix {
   const bombIgnited = findCell(
     matrix,
     (cell) => cell.type === CellType.BombIgnited
@@ -99,10 +89,15 @@ function detonateBombs(matrix: Matrix): Matrix {
   if (isWaitForDetonation(matrix)) {
     return matrix;
   }
-  return detonateBomb(matrix, bombIgnited.x, bombIgnited.y);
+  return detonateBomb(matrix, bombIgnited.x, bombIgnited.y, graveyard);
 }
 
-function detonateBomb(matrix: Matrix, x: number, y: number): Matrix {
+function detonateBomb(
+  matrix: Matrix,
+  x: number,
+  y: number,
+  graveyard: Graveyard
+): Matrix {
   if (matrix[x][y].type !== CellType.BombIgnited) {
     return matrix;
   }
@@ -110,6 +105,7 @@ function detonateBomb(matrix: Matrix, x: number, y: number): Matrix {
   return mapCells(matrix, (cell, cx, cy) => {
     if (cx >= x - 1 && cx <= x + 1 && cy >= y - 1 && cy <= y + 1) {
       if (cx === x && cy === y) {
+        graveyard.bombs[cell.color] += 1;
         return {
           ...cell,
           type: CellType.BombDetonated,
@@ -236,74 +232,78 @@ function canFuse(matrix: Matrix, x: number, y: number, color: Color): boolean {
   return true;
 }
 
-function mutateCell(cell: Cell, x: number, y: number, matrix: Matrix): Cell {
-  if (cell.type === CellType.Spawning) {
-    return {
-      ...cell,
-      type: CellType.Dropped,
-    };
-  } else if (
-    cell.type === CellType.Idle ||
-    cell.type === CellType.Dropped ||
-    cell.type === CellType.Bomb
-  ) {
-    const color = cell.color;
+const createCellMutator =
+  (graveyard: Graveyard) =>
+  (cell: Cell, x: number, y: number, matrix: Matrix): Cell => {
+    if (cell.type === CellType.Spawning) {
+      return {
+        ...cell,
+        type: CellType.Dropped,
+      };
+    } else if (
+      cell.type === CellType.Idle ||
+      cell.type === CellType.Dropped ||
+      cell.type === CellType.Bomb
+    ) {
+      const color = cell.color;
 
-    const h = [
-      canFuse(matrix, x - 2, y, color),
-      canFuse(matrix, x - 1, y, color),
-      canFuse(matrix, x + 1, y, color),
-      canFuse(matrix, x + 2, y, color),
-    ];
-    const v = [
-      canFuse(matrix, x, y - 2, color),
-      canFuse(matrix, x, y - 1, color),
-      canFuse(matrix, x, y + 1, color),
-      canFuse(matrix, x, y + 2, color),
-    ];
+      const h = [
+        canFuse(matrix, x - 2, y, color),
+        canFuse(matrix, x - 1, y, color),
+        canFuse(matrix, x + 1, y, color),
+        canFuse(matrix, x + 2, y, color),
+      ];
+      const v = [
+        canFuse(matrix, x, y - 2, color),
+        canFuse(matrix, x, y - 1, color),
+        canFuse(matrix, x, y + 1, color),
+        canFuse(matrix, x, y + 2, color),
+      ];
 
-    const verticalFusion = (v[0] && v[1]) || (v[1] && v[2]) || (v[2] && v[3]);
-    const horizontalFusion = (h[0] && h[1]) || (h[1] && h[2]) || (h[2] && h[3]);
+      const verticalFusion = (v[0] && v[1]) || (v[1] && v[2]) || (v[2] && v[3]);
+      const horizontalFusion =
+        (h[0] && h[1]) || (h[1] && h[2]) || (h[2] && h[3]);
 
-    if (cell.type === CellType.Bomb) {
-      if (verticalFusion || horizontalFusion) {
+      if (cell.type === CellType.Bomb) {
+        if (verticalFusion || horizontalFusion) {
+          return {
+            ...cell,
+            type: CellType.BombIgnited,
+          };
+        } else {
+          return cell;
+        }
+      } else if (horizontalFusion && verticalFusion) {
         return {
           ...cell,
-          type: CellType.BombIgnited,
+          type: CellType.Bomb,
+        };
+      } else if (horizontalFusion || verticalFusion) {
+        graveyard.squares[color] += 1;
+        return {
+          ...cell,
+          type: CellType.Fusion,
+          direction: horizontalFusion
+            ? FusionDirection.Horizontal
+            : FusionDirection.Vertical,
+          score: 1,
         };
       } else {
-        return cell;
+        return { ...cell, type: CellType.Idle };
       }
-    } else if (horizontalFusion && verticalFusion) {
+    } else if (cell.type === CellType.Fusion) {
+      return { ...cell, type: CellType.ScoreEnter };
+    } else if (cell.type === CellType.ScoreEnter) {
       return {
         ...cell,
-        type: CellType.Bomb,
+        type: CellType.ScoreExit,
       };
-    } else if (horizontalFusion || verticalFusion) {
-      return {
-        ...cell,
-        type: CellType.Fusion,
-        direction: horizontalFusion
-          ? FusionDirection.Horizontal
-          : FusionDirection.Vertical,
-        score: 1,
-      };
-    } else {
-      return { ...cell, type: CellType.Idle };
+    } else if (cell.type === CellType.BombDetonated) {
+      return { ...cell, type: CellType.ScoreEnter };
     }
-  } else if (cell.type === CellType.Fusion) {
-    return { ...cell, type: CellType.ScoreEnter };
-  } else if (cell.type === CellType.ScoreEnter) {
-    return {
-      ...cell,
-      type: CellType.ScoreExit,
-    };
-  } else if (cell.type === CellType.BombDetonated) {
-    return { ...cell, type: CellType.ScoreEnter };
-  }
 
-  return cell;
-}
+    return cell;
+  };
 
 function fillGaps(matrix: Matrix, random: () => number): Matrix {
   return matrix.map((col) => {
@@ -421,6 +421,7 @@ export function useEngine(options: EngineOptions): {
   restart: () => void;
   finished: boolean;
   previousMoves: Move[];
+  graveyard: Graveyard;
 } {
   const [iteration, setIteration] = useState(1);
 
@@ -439,6 +440,7 @@ export function useEngine(options: EngineOptions): {
   const [movesLeft, setMovesLeft] = useState(moves);
   const [finished, setFinished] = useState(false);
   const previousMoves = useRef<Move[]>([]);
+  const graveyardRef = useRef<Graveyard>(createGraveyard());
 
   useEffect(() => {
     setMatrix(createMatrix(random));
@@ -447,6 +449,7 @@ export function useEngine(options: EngineOptions): {
     setMovesLeft(moves);
     setFinished(false);
     previousMoves.current = [];
+    graveyardRef.current = createGraveyard();
   }, [setMatrix, setDirty, setMovesLeft, random]);
 
   const restart = useCallback(() => {
@@ -461,13 +464,19 @@ export function useEngine(options: EngineOptions): {
     scoreRef.current += score;
   }, []);
 
+  const graveyard = graveyardRef.current;
+
+  const mutateCell = useMemo(() => {
+    return createCellMutator(graveyard);
+  }, [graveyard]);
+
   useEffect(() => {
     if (!dirty) return;
     const interval = setInterval(() => {
       let newMatrix = mapCells(matrixRef.current, mutateCell);
       addScore(collectScore(newMatrix));
       newMatrix = fillGaps(newMatrix, random);
-      newMatrix = detonateBombs(newMatrix);
+      newMatrix = detonateBombs(newMatrix, graveyard);
       if (movesLeft < 1) {
         newMatrix = igniteAllBombs(newMatrix);
       }
@@ -483,7 +492,16 @@ export function useEngine(options: EngineOptions): {
     return () => {
       clearInterval(interval);
     };
-  }, [dirty, movesLeft, setMatrix, addScore, random, options.interval]);
+  }, [
+    dirty,
+    movesLeft,
+    setMatrix,
+    addScore,
+    random,
+    options.interval,
+    graveyard,
+    mutateCell,
+  ]);
 
   const onCellSwipe = useCallback(
     (id: string, direction: Direction) => {
@@ -517,5 +535,6 @@ export function useEngine(options: EngineOptions): {
     restart,
     finished,
     previousMoves: previousMoves.current,
+    graveyard,
   };
 }
