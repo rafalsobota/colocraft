@@ -18,9 +18,7 @@ export function CellView({
   finished: boolean;
 }) {
   const cursorClass = isInteractive ? "cursor-grab active:cursor-grabbing" : "";
-  const finishedClasses = finished
-    ? "scale-50 opacity-5 blur-md"
-    : "scale-100 ease-spring";
+  const finishedClasses = finished ? "scale-50" : "scale-100 ease-spring";
 
   const styles = {
     top: cell.type === CellType.Spawning ? -75 + 2 : y * 75 + 2,
