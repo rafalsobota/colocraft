@@ -42,7 +42,7 @@ export default function Summary2({
         isOpen
           ? "bg-opacity-90 dark:bg-opacity-90 z-10"
           : `opacity-0 bg-opacity-0 backdrop-blur-0 dark:bg-opacity-0`,
-        `transition-all ease-in-out transform w-full text-slate-700 dark:text-slate-400 absolute h-[630px] bg-white dark:bg-slate-900`
+        `transition-all ease-in-out w-full text-slate-700 dark:text-slate-400 absolute h-[630px] bg-white dark:bg-slate-900`
       )}
     >
       {/* <div className="p-2 text-sky-200 dark:text-sky-500 absolute top-[0px] text-6xl font-extralight w-full text-center opacity-10">
