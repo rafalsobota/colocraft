@@ -76,7 +76,7 @@ export function CellView({
         data-id={cell.id}
         className={`absolute ${bgColor(
           cell.color
-        )} bg-transparent text-4xl font-bold rounded-xl transform w-[70px] h-[70px] scale-1 transition-all ease-spring`}
+        )} bg-transparent text-4xl font-bold rounded-xl transform w-[70px] h-[70px] scale-10 transition-all ease-spring`}
         style={styles}
       >
         {cell.score}
