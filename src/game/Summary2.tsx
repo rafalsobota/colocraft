@@ -1,12 +1,8 @@
-import {
-  CubeTransparentIcon,
-  ExternalLinkIcon,
-  StarIcon,
-} from "@heroicons/react/solid";
+import { ExternalLinkIcon } from "@heroicons/react/solid";
 import { useEffect, useRef } from "react";
 import QRCode from "react-qr-code";
 import { bgColor } from "./color";
-import { Graveyard, graveyardStats, mapGraveyard } from "./graveyard";
+import { Graveyard, graveyardStats } from "./graveyard";
 
 type SummaryProps = {
   isOpen: boolean;
