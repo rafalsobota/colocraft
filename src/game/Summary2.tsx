@@ -47,10 +47,6 @@ export default function Summary2({
         `transition-all ease-in-out transform w-full text-slate-700 dark:text-slate-400 absolute z-10 h-[630px]`
       )}
     >
-      <div className="p-2 text-left text-sky-200 dark:text-sky-500 w-[110px] absolute top-[452px] left-[30px] text-xs">
-        {dateString}
-      </div>
-
       {/* <div className="p-2 text-sky-200 dark:text-sky-500 absolute top-[0px] text-6xl font-extralight w-full text-center opacity-10">
         {dateString}
       </div> */}
@@ -59,13 +55,16 @@ export default function Summary2({
         {dateString}
       </div> */}
 
-      <div className="flex flex-col items-center justify-center mt-[360px] z-20 absolute left-0 right-0 py-3">
-        <div className="flex flex-row items-center">
-          {/* <StarIcon className="h-16 mt-1 mr-1 text-green-500 " /> */}
-          <div className="text-6xl font-semibold text-black bg-white bg-opacity-50 dark:bg-opacity-50 dark:bg-slate-900 dark:text-white backdrop-blur-sm">
-            {scoreRef.current}
-          </div>
+      <div className="flex flex-col items-center justify-center absolute top-[340px] z-20 left-0 right-0 py-3">
+        {/* <div className="flex flex-row items-center"> */}
+        {/* <StarIcon className="h-16 mt-1 mr-1 text-green-500 " /> */}
+        <div className="font-semibold text-black bg-white bg-opacity-50 text-7xl dark:bg-opacity-50 dark:bg-slate-900 dark:text-white backdrop-blur-sm">
+          {scoreRef.current}
         </div>
+        <div className="text-sm text-left text-sky-200 dark:text-sky-500">
+          {dateString}
+        </div>
+        {/* </div> */}
         {/* 
         <div className="flex flex-row items-center px-2 bg-white rounded-md bg-opacity-70 dark:bg-slate-900 backdrop-blur-sm">
           <div>
@@ -76,7 +75,7 @@ export default function Summary2({
       </div>
 
       {isOpen ? (
-        <div className="px-4 absolute bottom-[260px] w-full opacity-100">
+        <div className="px-4 absolute bottom-[280px] w-full opacity-100">
           <div
             className="flex flex-row justify-center origin-bottom"
             // style={{
