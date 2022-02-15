@@ -1,6 +1,7 @@
 import { bgColor } from "./color";
 import { Cell, CellType, FusionDirection } from "./Engine";
 import { slowMobileBrowser } from "./system";
+import "./CellView.css";
 
 export function CellView({
   cell,
@@ -17,12 +18,13 @@ export function CellView({
   transitionDuration: number;
   finished: boolean;
 }) {
-  const cursorClass = isInteractive ? "cursor-grab active:cursor-grabbing" : "";
-  const finishedClasses = finished ? "scale-50" : "scale-100 ease-spring";
+  const finishedClasses = finished ? "scale-50" : "";
 
   const styles = {
-    top: cell.type === CellType.Spawning ? -75 + 2 : y * 75 + 2,
-    left: finished ? cell.color * 75 + 2 : x * 75 + 2,
+    "--tw-translate-y": `${
+      cell.type === CellType.Spawning ? -75 + 2 : y * 75 + 2
+    }px`,
+    "--tw-translate-x": `${finished ? cell.color * 75 + 2 : x * 75 + 2}px`,
     transitionDuration: transitionDuration + "ms",
   };
 
@@ -30,9 +32,7 @@ export function CellView({
     return (
       <div
         data-id={cell.id}
-        className={`absolute ${bgColor(
-          cell.color
-        )} rounded-xl w-[70px] h-[70px] transition-all ease-spring transform ${
+        className={`cell ${bgColor(cell.color)}  ${
           slowMobileBrowser() ? "" : "opacity-0"
         }`}
         style={styles}
@@ -42,9 +42,7 @@ export function CellView({
     return (
       <div
         data-id={cell.id}
-        className={`absolute ${bgColor(
-          cell.color
-        )} rounded-xl w-[70px] h-[70px] ${cursorClass}  transform transition-all ${finishedClasses}`}
+        className={`cell ${bgColor(cell.color)} ${finishedClasses}`}
         style={styles}
       ></div>
     );
@@ -52,9 +50,7 @@ export function CellView({
     return (
       <div
         data-id={cell.id}
-        className={`absolute ${bgColor(
-          cell.color
-        )} rounded-xl w-[70px] h-[70px] opacity-0 scale-0 transition-all transform ease-spring`}
+        className={`cell ${bgColor(cell.color)} opacity-0 scale-0`}
         style={styles}
       ></div>
     );
@@ -62,21 +58,27 @@ export function CellView({
     return (
       <div
         data-id={cell.id}
-        className={`absolute ${bgColor(cell.color)} transform rounded-xl ${
+        className={`cell ${bgColor(cell.color)} ${
           cell.direction === FusionDirection.Horizontal
-            ? "w-[90px] h-[0px] ml-[-10px] mt-[35px]"
-            : "w-[0px] h-[90px] ml-[35px] mt-[-10px]"
-        }  scale-100 transition-all ease-spring`}
-        style={styles}
+            ? "scale-x-125 scale-y-0"
+            : "scale-x-0 scale-y-125"
+        }`}
+        style={
+          {
+            ...styles,
+            "--tw-scale-x":
+              cell.direction === FusionDirection.Horizontal ? 1.25 : 0,
+            "--tw-scale-y":
+              cell.direction === FusionDirection.Horizontal ? 0 : 1.25,
+          } as any
+        }
       ></div>
     );
   } else if (cell.type === CellType.ScoreEnter) {
     return (
       <div
         data-id={cell.id}
-        className={`absolute ${bgColor(
-          cell.color
-        )} bg-transparent text-4xl font-bold rounded-xl transform w-[70px] h-[70px] scale-10 transition-all ease-spring`}
+        className={`cell ${bgColor(cell.color)} bg-opacity-0`}
         style={styles}
       >
         {cell.score}
@@ -86,9 +88,7 @@ export function CellView({
     return (
       <div
         data-id={cell.id}
-        className={`absolute ${bgColor(
-          cell.color
-        )} bg-transparent text-8xl font-bold transform rounded-xl w-[70px] h-[70px] opacity-0 transition-all ease-spring`}
+        className={`cell ${bgColor(cell.color)} opacity-0 scale-150`}
         style={styles}
       >
         {cell.score}
@@ -98,9 +98,7 @@ export function CellView({
     return (
       <div
         data-id={cell.id}
-        className={`absolute ${bgColor(
-          cell.color
-        )} rounded-full w-[70px] h-[70px] ${cursorClass} transition-all ease-spring transform`}
+        className={`cell ${bgColor(cell.color)} !rounded-full`}
         style={styles}
       ></div>
     );
@@ -108,22 +106,17 @@ export function CellView({
     return (
       <div
         data-id={cell.id}
-        className={`absolute ${bgColor(
+        className={`cell ${bgColor(
           cell.color
-        )} rounded-full w-[70px] h-[70px] transition-all ease-spring scale-50 animate-pulse transform`}
-        style={{
-          top: y * 75 + 2,
-          left: x * 75 + 2,
-        }}
+        )} !rounded-full scale-50 animate-pulse`}
+        style={styles}
       ></div>
     );
   } else if (cell.type === CellType.BombDetonated) {
     return (
       <div
         data-id={cell.id}
-        className={`absolute ${bgColor(
-          cell.color
-        )} rounded-sm w-[70px] h-[70px] transition-all ease-spring opacity-0 scale-[3] transform`}
+        className={`cell ${bgColor(cell.color)} opacity-0 scale-[3]`}
         style={styles}
       ></div>
     );

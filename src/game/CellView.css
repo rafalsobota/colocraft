@@ -1,0 +1,3 @@
+.cell {
+  @apply absolute rounded-xl w-[70px] h-[70px] transition-all ease-spring transform cursor-grab active:cursor-grabbing text-5xl font-bold;
+}
