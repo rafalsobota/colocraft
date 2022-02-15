@@ -70,7 +70,7 @@ export default function Summary2({
                             type === "bomb" ? "rounded-full" : ""
                           } ${bgColor(
                             color
-                          )} w-2 h-2 m-1 animate-[drop_300ms_ease-in-out] opacity-0`}
+                          )} w-2 h-2 m-1 animate-[drop_300ms_cubic-bezier(.48,1.6,.63,1.01)] opacity-0`}
                           style={{
                             animationDelay: `${i * 100 + j * 60}ms`,
                             animationFillMode: "forwards",

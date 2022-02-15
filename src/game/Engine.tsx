@@ -5,7 +5,7 @@ import { formatDate, makeRandomGenerator } from "./random";
 
 export const cols = 5;
 export const rows = 8;
-export const moves = 20;
+export const moves = 2;
 
 export enum CellType {
   Spawning,

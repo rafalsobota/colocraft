@@ -9,7 +9,7 @@ module.exports = {
       },
       keyframes: {
         drop: {
-          'from': { transform: 'translateY(-700px)', opacity: 0 },
+          'from': { transform: 'translateY(-100px)', opacity: 0 },
           'to': { transform: 'translateY(0px)', opacity: 1 },
         }
       }
