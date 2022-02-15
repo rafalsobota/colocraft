@@ -1,0 +1,15 @@
+@property --num {
+  syntax: "<integer>";
+  initial-value: 0;
+  inherits: false;
+}
+
+.score {
+  transition: --num 1.5s ease-in;
+  counter-reset: num var(--num);
+  animation-fill-mode: forwards;
+}
+
+.score::after {
+  content: counter(num);
+}

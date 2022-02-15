@@ -3,6 +3,7 @@ import { useEffect, useRef } from "react";
 import QRCode from "react-qr-code";
 import { bgColor } from "./color";
 import { Graveyard, graveyardStats } from "./graveyard";
+import "./Summary2.css";
 
 type SummaryProps = {
   isOpen: boolean;
@@ -45,27 +46,37 @@ export default function Summary2({
         `transition-all ease-in-out w-full text-slate-700 dark:text-slate-400 absolute h-[630px] bg-white dark:bg-slate-900`
       )}
     >
+      <div className="flex flex-col items-center justify-center absolute top-[340px] z-20 w-full">
+        <div
+          className="font-semibold text-black text-7xl dark:text-white score"
+          style={{ "--num": isOpen ? scoreRef.current : 0 } as any}
+        ></div>
+        <div className="text-sm text-left text-sky-500">{dateString}</div>
+      </div>
+
       {!isOpen ? null : (
         <>
-          <div className="flex flex-col items-center justify-center absolute top-[340px] z-20 w-full">
-            <div className="font-semibold text-black text-7xl dark:text-white">
-              {scoreRef.current}
-            </div>
-            <div className="text-sm text-left text-sky-500">{dateString}</div>
-          </div>
-
           <div className="px-4 absolute bottom-[290px] w-full opacity-100">
             <div className="flex flex-row justify-center">
-              {graveyardStats(graveyard).map(({ type, color, count }) => {
+              {graveyardStats(graveyard).map(({ type, color, count }, j) => {
                 return count < 1 ? null : (
                   <div className="flex flex-col-reverse">
-                    {Array(Math.min(count, 25)).fill(
-                      <div
-                        className={`${
-                          type === "bomb" ? "rounded-full" : ""
-                        } ${bgColor(color)} ${"w-2 h-2 m-1"}`}
-                      ></div>
-                    )}
+                    {Array(Math.min(count, 25))
+                      .fill(null)
+                      .map((el, i) => (
+                        <div
+                          key={`${j}-${i}`}
+                          className={`${
+                            type === "bomb" ? "rounded-full" : ""
+                          } ${bgColor(
+                            color
+                          )} w-2 h-2 m-1 animate-[drop_300ms_ease-in-out] opacity-0`}
+                          style={{
+                            animationDelay: `${i * 100 + j * 60}ms`,
+                            animationFillMode: "forwards",
+                          }}
+                        ></div>
+                      ))}
                   </div>
                 );
               })}
