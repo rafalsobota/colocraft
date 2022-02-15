@@ -133,7 +133,7 @@ function Replay() {
               x={x}
               y={y}
               isInteractive={isInteractive}
-              transitionDuration={slowmo ? 600 : 300}
+              transitionDuration={slowmo ? 450 : 300}
               finished={finished}
             />
           );

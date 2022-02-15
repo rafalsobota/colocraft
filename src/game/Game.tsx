@@ -20,7 +20,7 @@ function Game() {
     restart,
     previousMoves,
     graveyard,
-  } = useEngine({ interval: 150 });
+  } = useEngine({ interval: 100 });
 
   const navigate = useNavigate();
 

@@ -26,7 +26,6 @@ export default function Summary2({
   score,
   onPlay,
   onWatchReplay,
-  onCopyReplayLink,
   dateString,
   graveyard,
 }: SummaryProps) {
@@ -51,12 +50,12 @@ export default function Summary2({
           className="font-semibold text-black text-7xl dark:text-white score"
           style={{ "--num": isOpen ? scoreRef.current : 0 } as any}
         ></div>
-        <div className="text-sm text-left text-sky-500">{dateString}</div>
+        <div className="mt-1 text-sm text-sky-500">{dateString}</div>
       </div>
 
       {!isOpen ? null : (
         <>
-          <div className="px-4 absolute bottom-[290px] w-full opacity-100">
+          <div className="px-4 absolute bottom-[295px] w-full opacity-100">
             <div className="flex flex-row justify-center">
               {graveyardStats(graveyard).map(({ type, color, count }, j) => {
                 return count < 1 ? null : (
@@ -72,7 +71,9 @@ export default function Summary2({
                             color
                           )} w-2 h-2 m-1 animate-[drop_300ms_cubic-bezier(.48,1.6,.63,1.01)] opacity-0`}
                           style={{
-                            animationDelay: `${i * 100 + j * 60}ms`,
+                            animationDelay: `${
+                              i * 50 + 80 / (i + 1) + j * 60
+                            }ms`,
                             animationFillMode: "forwards",
                           }}
                         ></div>
@@ -95,15 +96,15 @@ export default function Summary2({
                   value={link}
                 />
 
-                <div className="flex flex-row items-center pt-1 text-sm text-sky-500">
-                  <ExternalLinkIcon className="h-4 mr-1" />
+                <div className="flex flex-row items-center pt-1 text-xs text-white">
+                  <ExternalLinkIcon className="h-3 mr-1" />
                   Link to replay
                 </div>
               </div>
             </a>
             <div className="flex flex-col flex-grow space-y-4">
               <button
-                className="px-8 py-4 border rounded-xl border-sky-500 text-sky-500 backdrop-blur-md"
+                className="px-8 py-4 bg-sky-500 rounded-xl text-sky-500 backdrop-blur-md bg-opacity-10"
                 onClick={onWatchReplay}
               >
                 Watch Replay
