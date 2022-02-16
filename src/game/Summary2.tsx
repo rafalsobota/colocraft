@@ -104,13 +104,13 @@ export default function Summary2({
             </a>
             <div className="flex flex-col flex-grow space-y-4">
               <button
-                className="px-8 py-4 bg-sky-500 rounded-xl text-sky-500 backdrop-blur-md bg-opacity-10"
+                className="px-8 py-4 bg-sky-500 rounded-xl text-sky-500 backdrop-blur-md bg-opacity-10 active:bg-sky-600 active:bg-opacity-10"
                 onClick={onWatchReplay}
               >
                 Watch Replay
               </button>
               <button
-                className="px-8 py-4 text-white bg-sky-500 rounded-xl"
+                className="px-8 py-4 text-white bg-sky-500 rounded-xl active:bg-sky-600"
                 onClick={onPlay}
               >
                 Play
