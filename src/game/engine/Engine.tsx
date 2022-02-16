@@ -529,6 +529,7 @@ export function useEngine(options: EngineOptions): {
     options.interval,
     graveyard,
     mutateCell,
+    today,
   ]);
 
   const onCellSwipe = useCallback(
