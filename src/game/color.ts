@@ -6,8 +6,10 @@ export enum Color {
   Purple,
 }
 
-export function randomColor(random: () => number): Color {
-  return Math.round(random() * 4);
+export const colors = Object.freeze([Color.Blue, Color.Green, Color.Yellow, Color.Pink, Color.Purple]);
+
+export function randomColor(random: () => number, availableColors: readonly Color[] = colors): Color {
+  return availableColors[Math.floor(random() * availableColors.length)];
 }
 
 export function bgColor(color: Color): string {

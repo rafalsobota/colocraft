@@ -59,7 +59,7 @@ export default function Summary2({
             <div className="flex flex-row justify-center">
               {graveyardStats(graveyard).map(({ type, color, count }, j) => {
                 return count < 1 ? null : (
-                  <div className="flex flex-col-reverse">
+                  <div className="flex flex-col-reverse" key={j}>
                     {Array(Math.min(count, 25))
                       .fill(null)
                       .map((el, i) => (

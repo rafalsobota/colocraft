@@ -1,5 +1,5 @@
 import { bgColor } from "./color";
-import { Cell, CellType, FusionDirection } from "./Engine";
+import { Cell, CellType, Line } from "./engine/Engine";
 import { slowMobileBrowser } from "./system";
 import "./CellView.css";
 
@@ -59,17 +59,15 @@ export function CellView({
       <div
         data-id={cell.id}
         className={`cell ${bgColor(cell.color)} ${
-          cell.direction === FusionDirection.Horizontal
+          cell.direction === Line.Horizontal
             ? "scale-x-125 scale-y-0"
             : "scale-x-0 scale-y-125"
         }`}
         style={
           {
             ...styles,
-            "--tw-scale-x":
-              cell.direction === FusionDirection.Horizontal ? 1.25 : 0,
-            "--tw-scale-y":
-              cell.direction === FusionDirection.Horizontal ? 0 : 1.25,
+            "--tw-scale-x": cell.direction === Line.Horizontal ? 1.25 : 0,
+            "--tw-scale-y": cell.direction === Line.Horizontal ? 0 : 1.25,
           } as any
         }
       ></div>

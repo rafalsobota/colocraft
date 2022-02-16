@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { Move, useEngine } from "./Engine";
+import { Move, useEngine } from "./engine/Engine";
 
 export default function useReplayEngine({ moves, interval, dateString }: { moves: Move[], interval: number, dateString?: string }): ReturnType<typeof useEngine> & { userPhase: boolean } {
 

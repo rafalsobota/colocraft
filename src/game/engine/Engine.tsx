@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Color, randomColor } from "./color";
-import { createGraveyard, Graveyard } from "./graveyard";
-import { formatDate, makeRandomGenerator } from "./random";
+import { Color, colors, randomColor } from "../color";
+import { createGraveyard, Graveyard } from "../graveyard";
+import { formatDate, makeRandomGenerator } from "../random";
 
 export const cols = 5;
 export const rows = 8;
@@ -20,7 +20,7 @@ export enum CellType {
   BombIgnited,
 }
 
-export enum FusionDirection {
+export enum Line {
   Horizontal,
   Vertical,
 }
@@ -35,12 +35,12 @@ export type Cell =
       color: Color;
       id: string;
       score: number;
-      direction: FusionDirection;
+      direction: Line;
     }
   | { type: CellType.ScoreEnter; color: Color; id: string; score: number }
   | { type: CellType.ScoreExit; color: Color; id: string; score: number }
-  | { type: CellType.Bomb; color: Color; id: string }
-  | { type: CellType.BombIgnited; color: Color; id: string }
+  | { type: CellType.Bomb; color: Color; id: string; level: number }
+  | { type: CellType.BombIgnited; color: Color; id: string; level: number }
   | { type: CellType.BombDetonated; color: Color; id: string; score: number };
 
 function findCellById(
@@ -64,7 +64,7 @@ function findCell(
   }
 }
 
-function isWaitForDetonation(matrix: Matrix): boolean {
+function isWaitingForDetonation(matrix: Matrix): boolean {
   const busy = findCell(
     matrix,
     (cell) =>
@@ -86,7 +86,7 @@ function detonateBombs(matrix: Matrix, graveyard: Graveyard): Matrix {
   if (!bombIgnited) {
     return matrix;
   }
-  if (isWaitForDetonation(matrix)) {
+  if (isWaitingForDetonation(matrix)) {
     return matrix;
   }
   return detonateBomb(matrix, bombIgnited.x, bombIgnited.y, graveyard);
@@ -118,7 +118,7 @@ function detonateBomb(
         return {
           ...cell,
           type: CellType.ScoreEnter,
-          score: 10,
+          score: 3,
         };
       } else if (cell.type === CellType.Bomb) {
         return {
@@ -277,16 +277,15 @@ const createCellMutator =
         return {
           ...cell,
           type: CellType.Bomb,
+          level: 1,
         };
       } else if (horizontalFusion || verticalFusion) {
         graveyard.squares[color] += 1;
         return {
           ...cell,
           type: CellType.Fusion,
-          direction: horizontalFusion
-            ? FusionDirection.Horizontal
-            : FusionDirection.Vertical,
-          score: 1,
+          direction: horizontalFusion ? Line.Horizontal : Line.Vertical,
+          score: 3,
         };
       } else {
         return { ...cell, type: CellType.Idle };
@@ -305,7 +304,33 @@ const createCellMutator =
     return cell;
   };
 
-function fillGaps(matrix: Matrix, random: () => number): Matrix {
+function isBomb(cell: Cell): boolean {
+  return (
+    cell.type === CellType.Bomb ||
+    cell.type === CellType.BombIgnited ||
+    cell.type === CellType.BombDetonated
+  );
+}
+
+function fillGaps(
+  matrix: Matrix,
+  random: () => number,
+  dateString: string
+): Matrix {
+  const forbiddenColors = new Set<Color>(
+    dateString < "2022-02-16"
+      ? []
+      : matrix
+          .flat()
+          .filter(isBomb)
+          .map((cell) => cell.color)
+  );
+
+  const availableColors =
+    forbiddenColors.size >= colors.length - 1
+      ? colors
+      : colors.filter((color) => !forbiddenColors.has(color));
+
   return matrix.map((col) => {
     const filteredRows = col.filter(
       (cell) =>
@@ -315,7 +340,7 @@ function fillGaps(matrix: Matrix, random: () => number): Matrix {
     return [
       ...Array(lackingCellsCount)
         .fill(null)
-        .map(() => createCell(random)),
+        .map(() => createCell(random, availableColors)),
       ...filteredRows,
     ];
   });
@@ -354,10 +379,13 @@ function igniteAllBombs(matrix: Matrix): Matrix {
   });
 }
 
-function createCell(random: () => number): Cell {
+function createCell(
+  random: () => number,
+  availableColors?: readonly Color[]
+): Cell {
   return {
     type: CellType.Spawning,
-    color: randomColor(random),
+    color: randomColor(random, availableColors),
     id: Math.round(random() * 100000000).toString(),
   };
 }
@@ -475,7 +503,7 @@ export function useEngine(options: EngineOptions): {
     const interval = setInterval(() => {
       let newMatrix = mapCells(matrixRef.current, mutateCell);
       addScore(collectScore(newMatrix));
-      newMatrix = fillGaps(newMatrix, random);
+      newMatrix = fillGaps(newMatrix, random, today);
       newMatrix = detonateBombs(newMatrix, graveyard);
       if (movesLeft < 1) {
         newMatrix = igniteAllBombs(newMatrix);

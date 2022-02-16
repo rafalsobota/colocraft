@@ -1,4 +1,4 @@
-import { Move } from "./Engine";
+import { Move } from "./engine/Engine";
 
 export function movesToReplayId(moves: Move[]): string {
   return moves.map((m) => `${m.x}${m.y}${m.direction || 0}`).join("-");

@@ -1,6 +1,6 @@
 import { useCallback, useState } from "react";
 import { LightningBoltIcon, StarIcon } from "@heroicons/react/solid";
-import { positionDeltaToDirection, useEngine } from "./Engine";
+import { positionDeltaToDirection, useEngine } from "./engine/Engine";
 import { CellView } from "./CellView";
 import { movesToReplayId } from "./encoding";
 import { formatDate } from "./random";
