@@ -96,7 +96,7 @@ export default function Summary2({
                   value={link}
                 />
 
-                <div className="flex flex-row items-center pt-1 text-xs text-white">
+                <div className="flex flex-row items-center pt-1 text-xs text-slate-900 dark:text-white">
                   <ExternalLinkIcon className="h-3 mr-1" />
                   Link to replay
                 </div>
