@@ -69,7 +69,7 @@ export default function Summary2({
                             type === "bomb" ? "rounded-full" : ""
                           } ${bgColor(
                             color
-                          )} w-2 h-2 m-1 animate-[drop_300ms_cubic-bezier(.48,1.6,.63,1.01)] opacity-0`}
+                          )} w-2 h-2 m-[3px] animate-[drop_300ms_cubic-bezier(.48,1.6,.63,1.01)] opacity-0`}
                           style={{
                             animationDelay: `${
                               i * 50 + 80 / (i + 1) + j * 60

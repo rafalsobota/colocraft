@@ -33,7 +33,7 @@ export function graveyardStats(graveyard: Graveyard): GraveyardStat[] {
   for (let color = 0; color < 5; color++) {
     let count = graveyard.bombs[color];
     while (count > 0) {
-      const countInCurrentSegment = Math.min(count, 20);
+      const countInCurrentSegment = Math.min(count, 25);
       acc.push({ type: 'bomb', color, count: countInCurrentSegment });
       count -= countInCurrentSegment;
     }
@@ -41,7 +41,7 @@ export function graveyardStats(graveyard: Graveyard): GraveyardStat[] {
   for (let color = 0; color < 5; color++) {
     let count = graveyard.squares[color];
     while (count > 0) {
-      const countInCurrentSegment = Math.min(count, 20);
+      const countInCurrentSegment = Math.min(count, 25);
       acc.push({ type: 'square', color, count: countInCurrentSegment });
       count -= countInCurrentSegment;
     }
