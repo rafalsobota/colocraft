@@ -31,10 +31,20 @@ export type GraveyardStat = { type: 'square' | 'bomb', color: Color, count: numb
 export function graveyardStats(graveyard: Graveyard): GraveyardStat[] {
   let acc: GraveyardStat[] = [];
   for (let color = 0; color < 5; color++) {
-    acc.push({ type: 'bomb', color, count: graveyard.bombs[color] });
+    let count = graveyard.bombs[color];
+    while (count > 0) {
+      const countInCurrentSegment = Math.min(count, 20);
+      acc.push({ type: 'bomb', color, count: countInCurrentSegment });
+      count -= countInCurrentSegment;
+    }
   }
   for (let color = 0; color < 5; color++) {
-    acc.push({ type: 'square', color, count: graveyard.squares[color] });
+    let count = graveyard.squares[color];
+    while (count > 0) {
+      const countInCurrentSegment = Math.min(count, 20);
+      acc.push({ type: 'square', color, count: countInCurrentSegment });
+      count -= countInCurrentSegment;
+    }
   }
   return acc;
 }
